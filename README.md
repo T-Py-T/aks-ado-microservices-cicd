@@ -1,83 +1,47 @@
-<p align="center">
-<img src="/src/frontend/static/icons/Hipster_HeroLogoMaroon.svg" width="300" alt="Online Boutique" />
-</p>
 
-![Continuous Integration](https://github.com/GoogleCloudPlatform/microservices-demo/workflows/Continuous%20Integration%20-%20Main/Release/badge.svg)
+# Azure Devops/Kubernetes microservice CI/CD
 
-**Online Boutique** is a cloud-first microservices demo application. Online Boutique consists of an 11-tier microservices application. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+> This project is a simple java web app that allows users to post their thoughts and blog digitally. Its mostly used to prove that scanning and other CI pipeline items are working.
 
-Google uses this application to demonstrate the use of technologies like Kubernetes, AKS, Istio, Stackdriver, and gRPC. This application
-works on any Kubernetes cluster, like Azure Kubernetes Service (AKS). It’s **easy to deploy with little to no configuration**.
+This DevOps project employs a comprehensive CI pipeline to automate the development and deployment process. The architecture emphasizes security, performance, and reliability, integrating industry-leading tools and practices.
 
-## Screenshots
+### My DevOps Scripting Examples
 
-| Home Page                                                                                                         | Checkout Screen                                                                                                    |
-| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+- My current examples of this project are located here:
+  - This included Terraform, Bash scripts and other scripting
+  - https://github.com/T-Py-T/devops-install-scripts
+
+## Application overview
+
+[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) is a cloud-first microservices demo application consisting of 11 microservices applications. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+
+### Screenshots
+
+| Home Page | Checkout Screen |
+| ------- | ----- |
 | [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
-## Deploy Online Boutique to the cluster.
+### Application Architecture
 
-   ```sh
-   kubectl apply -f ./release/kubernetes-manifests.yaml
-   ```
+Each of the 11 microservices written in different languages that talk to each other over gRPC.
 
-### Wait for the pods to be ready.
-
-   ```sh
-   kubectl get pods
-   ```
-
-   After a few minutes, you should see the Pods in a `Running` state:
-
-   ```
-   NAME                                     READY   STATUS    RESTARTS   AGE
-   adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-   cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-   checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-   currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-   emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-   frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-   loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-   paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-   productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-   recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-   redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-   shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-   ```
-
-### Access the web frontend in a browser using the frontend's external IP.
-
-   ```sh
-   kubectl get service frontend-external | awk '{print $4}'
-   ```
-
-   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
-
-### Once you are done with it, delete the AKS cluster.
-
-## Architecture
-
-**Online Boutique** is composed of 11 microservices written in different
-languages that talk to each other over gRPC.
-
-[![Architecture of
-microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+[![Architecture of microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
 
 Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
-| Service                                              | Language      | Description                                                                                                                       |
-| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [frontend](/src/frontend)                           | Go            | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](/src/cartservice)                     | C#            | Stores the items in the user's shopping cart in Redis and retrieves it.                                                           |
-| [productcatalogservice](/src/productcatalogservice) | Go            | Provides the list of products from a JSON file and ability to search products and get individual products.                        |
-| [currencyservice](/src/currencyservice)             | Node.js       | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](/src/paymentservice)               | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
+| Service | Language |   Description     |
+| -------| --------| -------- |
+| [frontend](/src/frontend) | Go    | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
+| [cartservice](/src/cartservice) | C#  | Stores the items in the user's shopping cart in Redis and retrieves it.   |
+| [productcatalogservice](/src/productcatalogservice) | Go   | Provides the list of products from a JSON file and ability to search products and get individual products.  |
+| [currencyservice](/src/currencyservice) | Node.js   | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
+| [paymentservice](/src/paymentservice)  | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
 | [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
 | [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
 | [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
 | [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
 | [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.                                              |
+| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.     |
 
 ## Features
 
@@ -92,19 +56,11 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 - **Synthetic Load Generation:** The application demo comes with a background
   job that creates realistic usage patterns on the website using
   [Locust](https://locust.io/) load generator.
-
-
-# Azure Devops/Kubernetes microservice CI/CD
-
-[!HINT] This project is a simple java web app that allows users to post their thoughts and blog digitally. Its mostly used to prove that the pipeline is working.
-
-This DevOps project employs a comprehensive CI/CD pipeline to automate the development and deployment process. The architecture emphasizes security, performance, and reliability, integrating industry-leading tools and practices.
-
-## My DevOps Scripting Examples
-
-- My current examples of this project are located here:
-  - This included Terraform, Bash scripts and other scripting
-  - https://github.com/T-Py-T/devops-install-scripts
+  
+  
+> # Note: This is a reminder to come back and update this section.
+- [ ] Add screenshots of monitoring dashboards
+- [ ] Describe log aggregation strategy
 
 ## Best Practices Followed
 
@@ -120,52 +76,44 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
 
 ![Architecture Diagram](docs/img/CICD-Architechture.png)
 
+
 ### Key Components
 
 #### A. **Source Code Management**
 
-- **GitHub**: 
+- **GitHub**:
   - Serves as the backbone of version control, ensuring seamless collaboration among team members.
   - Pull requests and branch strategies help enforce coding standards and encourage peer reviews.
   - Integrated with Jenkins to trigger automated builds and tests upon code commits, ensuring continuous integration.
+  - Setup with the Azure Devops Project with connection to the git repository
 
 #### B. **Build and Test Automation**
 
-- **Jenkins**:
+- **Azure DevOps**:
   - Orchestrates the CI/CD pipeline, ensuring that builds, tests, and deployments are fully automated.
   - Integrates with tools like GitHub and Docker to create a streamlined process from code commit to deployment.
   - Provides real-time feedback to developers about build status and test results.
 
-- **Jenkins-TODO**:
+  **CI Pipelines**
+  ![alt text](docs/img/ado-ci-pipelines.png)
+
+  **Release Pipelines**
+  ![Release Pipelines](docs/img/ado-release-pipelines.png)
+
+  **Dev AKS Deplyoment**
+  ![Dev Kube Status](docs/img/prod-kube.png)
+
+  **Prod AKS Deplyoment**
+  ![Dev Kube Status](docs/img/dev-kube.png)
+
+
+- **Azure DevOps -TODO**:
   - Relies on external Terraform setup for environment to work
     - When cluster is built API changes
     - Permissions for Jenkins need to be created with cluster (kubectl)
   - Call Terraform in pipeline
     - Allow for tear down of resources after load testing is completed.
     - Pipeline created cluster can be used for load or AB testing.
-
-- **Without Terraform :**
-- Kubernetes deployment (apply and get pods) fails
-![Jenkins Pipeline](docs/img/Jenkins-Pipeline.png)
-- **With Terraform :**
-![Completed Kube Deployment](docs/img/Completed-Kube-Deployment.png)
-
-- **Maven**:
-  - Simplifies dependency management and builds process for Java projects.
-  - Ensures that all dependenciess ns are resolved before building the application, reducing errors and inconsistencies.
-
-- **Nexus Repository Manager**:
-  - Acts as a centralized artifact repository, storing and managing Maven dependencies, Docker docs/img, and other build artifacts.
-  - Improves build speed by caching dependencies locally, reducing network traffic and build times.
-  - Enhances security by providing a controlled, internal source for third-party libraries and internally developed components.
-
-  - **Nexus hosted artifacts**
-  ![Nexus Dashboard](docs/img/NexusDashboard.png)
-  - **Nexus Artifacts**
-  ![Nexus Artifacts](docs/img/NexusArtifacts.png)
-  - **Nexus feedback in Jenkins**
-  ![Nexus Feedback](docs/img/NexusFeedback.png)
-
 
 #### C. **Security Scanning**
 
@@ -191,36 +139,82 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
 
 #### E. **Container Orchestration**
 
-- **Elastic Kubernetes Service (EKS)**:
+- **Azure Kubernetes Service (AKS)**:
   - Manages the deployment and scaling of containerized applications in a highly available environment.
   - Ensures zero downtime by automatically scaling and redistributing workloads as needed.
   - Namespace configurations (e.g., `webapps` and `namespace 2`) isolate different parts of the system for better organization and security. The second namespace is not currently used, but is planned for a similar python web app
-  - The configuration for EKS was update from the **terraform.tf** listed in the linked repo and shown implemented below in a later section.
+  - The configuration for AKS was update from the **terraform.tf** listed in the linked repo and shown implemented below in a later section.
 
-- **EKS Nodes**
-  ![EKS Nodes Image](docs/img/EKS-Nodes.png)
+- **AKS Nodes**
+  ![AKS Nodes Image](docs/img/defaultImage.png)
 
-- **EKS CLuster**
-  ![EKS Cluster Image](docs/img/EKS-Cluster.png)
+- **AKS CLuster**
+  ![AKS Cluster Image](docs/img/defaultImage.png)
 
-- **EKS Networking**
-  ![EKS Cluster Image](docs/img/EKS-Networking.png)
+- **AKS Networking**
+  ![AKS Cluster Image](docs/img/defaultImage.png)
 
+
+<!-- REMOVE WHEN READY IF REQUIRED
+
+## Deploy Online Boutique to the cluster
+This is run during the deployment (CD) pipeline that is contigent on a successful CI pipeline completion
+
+   ```sh
+   kubectl apply -f ./release/kubernetes-manifests.yaml
+   ```
+
+### Wait for the pods to be ready.
+
+   ```sh
+   kubectl get pods
+   ```
+
+   After a few minutes, you should see the Pods in a `Running` state:
+
+   ``` tty
+   NAME                                     READY   STATUS    RESTARTS   AGE
+   adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
+   cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
+   checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
+   currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
+   emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
+   frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
+   loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
+   paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
+   productcatalogservice-557d474574-888kr   1/1     Running   0          3m
+   recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
+   redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
+   shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
+   ```
+
+### Access the web frontend in a browser using the frontend's external IP.
+
+   ```sh
+   kubectl get service frontend-external | awk '{print $4}'
+   ```
+
+   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
+
+### Once you are done with it, delete the AKS cluster.
+-->
+
+  
 #### F. **Monitoring and Observability**
 
 - **Prometheus**:
   - Collects metrics from various components of the application and infrastructure, providing deep insights into system health and performance.
   - Supports custom queries to detect anomalies and trigger alerts proactively.
-
-  ![Prometheus Image](docs/img/Prometheus.png)
+  ![Prometheus Image](docs/img/defaultImage.png)
 
 - **Grafana**:
   - Provides user-friendly dashboards for visualizing Prometheus metrics.
   - Enables stakeholders to monitor key performance indicators (KPIs) in real-time, ensuring system reliability.
-
-  ![Grafana Image](docs/img/Grafana.png)
+  ![Grafana Image](docs/img/defaultImage.png)
 
   *Callout Area*: Include snapshots of Grafana dashboards and Prometheus query outputs, demonstrating the observability aspect of the pipeline.
+
+<!-- Removed Until IaC is added to the project
 
 #### G. **Infrastructure as Code (IaC)**
 
@@ -233,9 +227,9 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
     - **Internet Gateway**: Provides internet access to the resources within the VPC.
     - **Route Tables and Associations**: Configures routing for the subnets to allow public internet access.
     - **Security Groups**: Defines rules for cluster and node communication, ensuring controlled ingress and egress.
-    - **EKS Cluster**: Deploys an Elastic Kubernetes Service cluster for managing the application containers.
-    - **EKS Node Group**: Provisions a scalable worker node group with `t2.large` instances to support container workloads.
-    - **IAM Roles and Policies**: Configures roles and permissions for both the EKS cluster and node group to interact with AWS services.
+    - **AKS Cluster**: Deploys an Azure Kubernetes Service cluster for managing the application containers.
+    - **AKS Node Group**: Provisions a scalable worker node group with `t2.large` instances to support container workloads.
+    - **IAM Roles and Policies**: Configures roles and permissions for both the AKS cluster and node group to interact with AWS services.
   - Facilitates rapid updates and scaling of infrastructure to match application requirements.
 
 ``` bash
@@ -249,20 +243,5 @@ terraform apply --auto-approve
 ```
 
 ![Terraform Apply](docs/img/TerraformApply.png)
-![Terraform Output](docs/img/Terraform-Output.png)
-
-#### H. **AWS Integration**
-
-- **EC2**: Used to house the servers that control the CI/CD process and handles the actions.
-  ![EC2 Instances](docs/img/EC2_Instances.png)
-
-- **VPC**:
-  - Ensures a secure and isolated environment for hosting applications and infrastructure.
-- **S3 Bucket**:
-  - Stores artifacts, logs, and backups, ensuring durability and availability.
-- **Route 53**:
-  - Manages domain names and routes traffic efficiently to ensure seamless user experiences.
-- **CloudFront CDN**:
-  - Enhances performance by caching content close to end users.
-- **Network Load Balancer**:
-  - Distributes incoming traffic to backend services, improving fault tolerance and scalability.
+![Terraform Output](docs/img/Terraform-Output.png) 
+-->
