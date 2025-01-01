@@ -1,0 +1,342 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  name: Azure Pipelines
+  vmImage: 'ubuntu-latest'
+
+pr: none
+
+variables:
+  - group: Docker
+  - name: sonarQubeServiceEndpoint
+    value: 'SonarQubeServiceEndpoint' # Replace with your SonarQube service endpoint name
+
+jobs:
+
+  - job: StaticAnalyze
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+
+      - script: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+        displayName: Install Trivy
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-adservice-scan-report.html /src/adservice/src/main
+        displayName: Run Trivy SAST on adservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-cartservice-scan-report.html /src/cartservice/src
+        displayName: Run Trivy SAST on cartservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-checkoutservice-scan-report.html /src/checkoutservice
+        displayName: Run Trivy SAST on checkoutservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-currencyservice-scan-report.html /src/currencyservice
+        displayName: Run Trivy SAST on currencyservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-emailservice-scan-report.html /src/emailservice
+        displayName: Run Trivy SAST on emailservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-frontend-scan-report.html /src/frontend
+        displayName: Run Trivy SAST on frontend
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-loadgenerator-scan-report.html /src/loadgenerator
+        displayName: Run Trivy SAST on loadgenerator
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-paymentservice-scan-report.html /src/paymentservice
+        displayName: Run Trivy SAST on paymentservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-productcatalogservice-scan-report.html /src/productcatalogservice
+        displayName: Run Trivy SAST on productcatalogservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-recommendationservice-scan-report.html /src/recommendationservice
+        displayName: Run Trivy SAST on recommendationservice
+
+      - script: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-shippingservice-scan-report.html /src/shippingservice
+        displayName: Run Trivy SAST on shippingservice
+
+
+  # - job: SonarQubeAnalyze
+  #   dependsOn: StaticAnalyze
+  #   steps:
+  #     - task: SonarQubePrepare@5
+  #       inputs:
+  #         SonarQube: '$(sonarQubeServiceEndpoint)'
+  #         scannerMode: 'CLI'
+  #         configMode: 'manual'
+  #         cliProjectKey: 'adservice'
+  #         cliProjectName: 'adservice'
+  #         cliSources: 'src/adservice'
+  #       displayName: Prepare SonarQube Analysis for adservice
+
+  #     - task: SonarQubeAnalyze@5
+  #       displayName: Run SonarQube Analysis for adservice
+
+  #     - task: SonarQubePublish@5
+  #       inputs:
+  #         pollingTimeoutSec: '300'
+  #       displayName: Publish SonarQube Analysis for adservice
+
+  #     # Repeat the SonarQube tasks for other services
+  #     - task: SonarQubePrepare@5
+  #       inputs:
+  #         SonarQube: '$(sonarQubeServiceEndpoint)'
+  #         scannerMode: 'CLI'
+  #         configMode: 'manual'
+  #         cliProjectKey: 'cartservice'
+  #         cliProjectName: 'cartservice'
+  #         cliSources: 'src/cartservice'
+  #       displayName: Prepare SonarQube Analysis for cartservice
+
+  #     - task: SonarQubeAnalyze@5
+  #       displayName: Run SonarQube Analysis for cartservice
+
+  #     - task: SonarQubePublish@5
+  #       inputs:
+  #         pollingTimeoutSec: '300'
+  #       displayName: Publish SonarQube Analysis for cartservice
+
+  #     # Add similar SonarQube tasks for other services...
+
+  - job: BuildAndPushImages
+    dependsOn: StaticAnalyze
+    steps:
+      - task: Docker@2
+        displayName: adservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/adservice
+          Dockerfile: src/adservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: cartservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/cartservice
+          Dockerfile: src/cartservice/src/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: checkoutservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/checkoutservice
+          Dockerfile: src/checkoutservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: currencyservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/currencyservice
+          Dockerfile: src/currencyservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: emailservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/emailservice
+          Dockerfile: src/emailservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: frontend-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/frontend
+          Dockerfile: src/frontend/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: loadgenerator-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/loadgenerator
+          Dockerfile: src/loadgenerator/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: paymentservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/paymentservice
+          Dockerfile: src/paymentservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: productcatalogservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/productcatalogservice
+          Dockerfile: src/productcatalogservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: recommendationservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/recommendationservice
+          Dockerfile: src/recommendationservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: shippingservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/shippingservice
+          Dockerfile: src/shippingservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+  - job: PullAndScanImages
+    dependsOn: BuildAndPushImages
+    steps:
+      - script: |
+          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
+        displayName: Login to Docker Hub
+        env:
+          dockerUsername: $(dockerUsername)
+          dockerPassword: $(dockerPassword)
+
+      - script: |
+          docker pull $(dockerUsername)/adservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/adservice:$(Build.BuildId)
+        displayName: adservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/cartservice:$(Build.BuildId)
+        displayName: cartservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/checkoutservice:$(Build.BuildId)
+        displayName: checkoutservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/currencyservice:$(Build.BuildId)
+        displayName: currencyservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/emailservice:$(Build.BuildId)
+        displayName: emailservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/frontend:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/frontend:$(Build.BuildId)
+        displayName: frontend-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/loadgenerator:$(Build.BuildId)
+        displayName: loadgenerator-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/paymentservice:$(Build.BuildId)
+        displayName: paymentservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+        displayName: productcatalogservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/recommendationservice:$(Build.BuildId)
+        displayName: recommendationservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
+          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/shippingservice:$(Build.BuildId)
+        displayName: shippingservice-pull-and-scan
+  
+  - job: PullAndTestImages
+    dependsOn: PullAndScanImages
+    steps:
+      - script: |
+          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
+        displayName: Login to Docker Hub
+        env:
+          dockerUsername: $(dockerUsername)
+          dockerPassword: $(dockerPassword)
+
+      - script: |
+          docker pull $(dockerUsername)/adservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: adservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: cartservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: checkoutservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: currencyservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: emailservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/frontend:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: frontend-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: loadgenerator-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: paymentservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: productcatalogservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: recommendationservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: shippingservice-pull-and-test

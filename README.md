@@ -64,11 +64,23 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
 ## Best Practices Followed
 
-1. **Automation**: The build, test, and deployment process is automated, reducing the risk of human error and speeding up the cycle times. Automation ensures that every code change is tested and validated before deployment.
-2. **Security First**: Integrating Aqua Trivy and SonarQube ensures that security vulnerabilities and code quality issues are detected and addressed early in the pipeline, fostering a secure development lifecycle.
-3. **Scalability**: Kubernetes provides a scalable infrastructure that can handle fluctuating loads, ensuring consistent performance during peak traffic.
-4. **Observability**: Using Grafana and Prometheus allows real-time monitoring, enabling proactive identification and resolution of potential issues before they impact users.
-5. **Version Control and Code Review**: GitHub serves as the foundation for collaboration and quality control, ensuring that only well-reviewed, high-quality code reaches production.
+DevOps
+
+- **Automation**: The build, test, and deployment process is automated, reducing the risk of human error and speeding up the cycle times. Automation ensures that every code change is tested and validated before deployment.
+- **Security First**: Integrating Aqua Trivy and SonarQube ensures that security vulnerabilities and code quality issues are detected and addressed early in the pipeline, fostering a secure development lifecycle.
+- **Scalability**: Kubernetes provides a scalable infrastructure that can handle fluctuating loads, ensuring consistent performance during peak traffic.
+- **Observability**: Using __________ allows real-time monitoring, enabling proactive identification and resolution of potential issues before they impact users.
+- **Version Control and Code Review**: GitHub serves as the foundation for collaboration and quality control, ensuring that only well-reviewed, high-quality code reaches production.
+
+DevSecOps
+- **Secrets Management: Docker credentials are stored securely using Azure DevOps secrets or variable groups.
+- **Automated Dependency Scanning: Added Snyk to scan for vulnerabilities in dependencies.
+- **Static Analysis: Trivy is used for static analysis.
+- **Build and Push Images: Docker images are built and pushed to Docker Hub.
+- **Image Scanning: Docker images are pulled and scanned for vulnerabilities using Trivy.
+- **Pull and Test Images: Docker images are pulled and tested.
+
+
 
 ## Architecture
 
