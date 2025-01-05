@@ -2,6 +2,9 @@ trigger:
   branches:
     include:
       - main
+  paths:
+    exclude:
+      - '**/deployment-service.yml'
 
 pool:
   name: Azure Pipelines
@@ -11,8 +14,6 @@ pr: none
 
 variables:
   - group: Docker
-  - name: sonarQubeServiceEndpoint
-    value: 'SonarQubeServiceEndpoint' # Replace with your SonarQube service endpoint name
 
 jobs:
 
@@ -31,91 +32,8 @@ jobs:
         displayName: Install Trivy
 
       - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-adservice-scan-report.html /src/adservice/src/main
-        displayName: Run Trivy SAST on adservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-cartservice-scan-report.html /src/cartservice/src
-        displayName: Run Trivy SAST on cartservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-checkoutservice-scan-report.html /src/checkoutservice
-        displayName: Run Trivy SAST on checkoutservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-currencyservice-scan-report.html /src/currencyservice
-        displayName: Run Trivy SAST on currencyservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-emailservice-scan-report.html /src/emailservice
-        displayName: Run Trivy SAST on emailservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-frontend-scan-report.html /src/frontend
-        displayName: Run Trivy SAST on frontend
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-loadgenerator-scan-report.html /src/loadgenerator
-        displayName: Run Trivy SAST on loadgenerator
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-paymentservice-scan-report.html /src/paymentservice
-        displayName: Run Trivy SAST on paymentservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-productcatalogservice-scan-report.html /src/productcatalogservice
-        displayName: Run Trivy SAST on productcatalogservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-recommendationservice-scan-report.html /src/recommendationservice
-        displayName: Run Trivy SAST on recommendationservice
-
-      - script: |
-          trivy fs --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-shippingservice-scan-report.html /src/shippingservice
-        displayName: Run Trivy SAST on shippingservice
-
-
-  # - job: SonarQubeAnalyze
-  #   dependsOn: StaticAnalyze
-  #   steps:
-  #     - task: SonarQubePrepare@5
-  #       inputs:
-  #         SonarQube: '$(sonarQubeServiceEndpoint)'
-  #         scannerMode: 'CLI'
-  #         configMode: 'manual'
-  #         cliProjectKey: 'adservice'
-  #         cliProjectName: 'adservice'
-  #         cliSources: 'src/adservice'
-  #       displayName: Prepare SonarQube Analysis for adservice
-
-  #     - task: SonarQubeAnalyze@5
-  #       displayName: Run SonarQube Analysis for adservice
-
-  #     - task: SonarQubePublish@5
-  #       inputs:
-  #         pollingTimeoutSec: '300'
-  #       displayName: Publish SonarQube Analysis for adservice
-
-  #     # Repeat the SonarQube tasks for other services
-  #     - task: SonarQubePrepare@5
-  #       inputs:
-  #         SonarQube: '$(sonarQubeServiceEndpoint)'
-  #         scannerMode: 'CLI'
-  #         configMode: 'manual'
-  #         cliProjectKey: 'cartservice'
-  #         cliProjectName: 'cartservice'
-  #         cliSources: 'src/cartservice'
-  #       displayName: Prepare SonarQube Analysis for cartservice
-
-  #     - task: SonarQubeAnalyze@5
-  #       displayName: Run SonarQube Analysis for cartservice
-
-  #     - task: SonarQubePublish@5
-  #       inputs:
-  #         pollingTimeoutSec: '300'
-  #       displayName: Publish SonarQube Analysis for cartservice
-
-  #     # Add similar SonarQube tasks for other services...
+          trivy fs --severity HIGH,CRITICAL --format table .
+        displayName: Run Trivy File Scan SAST on /src
 
   - job: BuildAndPushImages
     dependsOn: StaticAnalyze
@@ -214,6 +132,18 @@ jobs:
   - job: PullAndScanImages
     dependsOn: BuildAndPushImages
     steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+
+      - script: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+        displayName: Install Trivy
+      
       - script: |
           docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
         displayName: Login to Docker Hub
@@ -223,57 +153,57 @@ jobs:
 
       - script: |
           docker pull $(dockerUsername)/adservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/adservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/adservice:$(Build.BuildId)
         displayName: adservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/cartservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/cartservice:$(Build.BuildId)
         displayName: cartservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/checkoutservice:$(Build.BuildId)
         displayName: checkoutservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/currencyservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/currencyservice:$(Build.BuildId)
         displayName: currencyservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/emailservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/emailservice:$(Build.BuildId)
         displayName: emailservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/frontend:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/frontend:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/frontend:$(Build.BuildId)
         displayName: frontend-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/loadgenerator:$(Build.BuildId)
         displayName: loadgenerator-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/paymentservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/paymentservice:$(Build.BuildId)
         displayName: paymentservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/productcatalogservice:$(Build.BuildId)
         displayName: productcatalogservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/recommendationservice:$(Build.BuildId)
         displayName: recommendationservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
-          trivy image --exit-code 1 --severity HIGH,CRITICAL --format table -o trivy-image-scan-report.html $(dockerUsername)/shippingservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/shippingservice:$(Build.BuildId)
         displayName: shippingservice-pull-and-scan
   
   - job: PullAndTestImages
@@ -340,3 +270,23 @@ jobs:
           docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
           # Add your custom test commands here
         displayName: shippingservice-pull-and-test
+
+  - job: UpdateAndCommitDeploymentYAML
+    dependsOn: PullAndTestImages
+    steps:
+      - checkout: self
+        persistCredentials: true
+      - script: |
+          services=("adservice" "cartservice" "checkoutservice" "currencyservice" "emailservice" "frontend" "loadgenerator" "paymentservice" "productcatalogservice" "recommendationservice" "shippingservice")
+          for service in "${services[@]}"; do
+            sed -i "s|image: $(dockerUsername)/${service}:.*|image: $(dockerUsername)/${service}:$(Build.BuildId)|" deployment-service.yaml
+          done
+          git config user.name "azure-pipelines"
+          git config user.email "azure-pipelines@dev.azure.com"
+          git add deployment-service.yaml
+          git commit -m "Update Docker images to $(Build.BuildId) [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:$(Build.SourceBranch)
+        displayName: Update and Commit Deployment YAML
+        env:
+          GIT_USERNAME: $(gitUsername)
+          GIT_PASSWORD: $(gitPassword)

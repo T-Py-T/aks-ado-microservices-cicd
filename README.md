@@ -1,25 +1,16 @@
-
 # Azure Devops/Kubernetes microservice CI/CD
-
-> This project is a simple java web app that allows users to post their thoughts and blog digitally. Its mostly used to prove that scanning and other CI pipeline items are working.
 
 This DevOps project employs a comprehensive CI pipeline to automate the development and deployment process. The architecture emphasizes security, performance, and reliability, integrating industry-leading tools and practices.
 
-### My DevOps Scripting Examples
+-This project is using an example microservices demo (Google Cloud) with the link shown below.
 
-- My current examples of this project are located here:
-  - This included Terraform, Bash scripts and other scripting
-  - https://github.com/T-Py-T/devops-install-scripts
+> **My DevOps Scripting Examples**
+    - Re-usable examples Terraform, Bash scripts and other scripting
+      - https://github.com/T-Py-T/devops-install-scripts
 
 ## Application overview
 
 [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) is a cloud-first microservices demo application consisting of 11 microservices applications. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
-
-### Screenshots
-
-| Home Page | Checkout Screen |
-| ------- | ----- |
-| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
 ### Application Architecture
 
@@ -43,51 +34,57 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 | [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
 | [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.     |
 
+### Screenshots
+
+| Home Page | Checkout Screen |
+| ------- | ----- |
+| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
+
 ## Features
 
 - **[Kubernetes](https://kubernetes.io)/[AKS](https://azure.microsoft.com/en-us/products/kubernetes-service):**
-  The app is designed to run on Kubernetes (both locally on "Docker for
-  Desktop", as well as on the cloud with AKS).
-- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to
-  communicate to each other.
+  The app is designed to run on Kubernetes (both locally on "Docker for Desktop", as well as on the cloud with AKS).
+- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to communicate to each other.
+- **Synthetic Load Generation:** The application demo comes with a background job that creates realistic usage patterns on the website using [Locust](https://locust.io/) load generator.
 
-- **[Skaffold](https://skaffold.dev):** Application
-  is deployed to Kubernetes with a single command using Skaffold.
-- **Synthetic Load Generation:** The application demo comes with a background
-  job that creates realistic usage patterns on the website using
-  [Locust](https://locust.io/) load generator.
-  
-  
+<!-- 
+**************** TODO SECTION 
+
 > # Note: This is a reminder to come back and update this section.
 - [ ] Add screenshots of monitoring dashboards
 - [ ] Describe log aggregation strategy
+- [ ] Combine AKS definition (2 sections)
+- [ ] Update the 
+- [ ] Add Istio config/images/section
+- [ ] Add ArgoCD Images/Section
+- [ ] Terraform Section?
+- [ ] Prometheus Section? 
+-->
 
 ## Best Practices Followed
 
-DevOps
+### DevOps
 
 - **Automation**: The build, test, and deployment process is automated, reducing the risk of human error and speeding up the cycle times. Automation ensures that every code change is tested and validated before deployment.
-- **Security First**: Integrating Aqua Trivy and SonarQube ensures that security vulnerabilities and code quality issues are detected and addressed early in the pipeline, fostering a secure development lifecycle.
+- **Security First**: Integrating Aqua Trivy ensures that security vulnerabilities and code quality issues are detected and addressed early in the pipeline, fostering a secure development lifecycle.
 - **Scalability**: Kubernetes provides a scalable infrastructure that can handle fluctuating loads, ensuring consistent performance during peak traffic.
-- **Observability**: Using __________ allows real-time monitoring, enabling proactive identification and resolution of potential issues before they impact users.
 - **Version Control and Code Review**: GitHub serves as the foundation for collaboration and quality control, ensuring that only well-reviewed, high-quality code reaches production.
+<!-- - **Observability**: Using istio allows real-time monitoring, enabling proactive identification and resolution of potential issues before they impact users.
+- **GitOps with ArgoCD**: Using the repo monitoring of ArgoCD, we are able to detect changes in the mainfest of the repository and sync the changes into the Kubernetes environment. -->
 
-DevSecOps
-- **Secrets Management: Docker credentials are stored securely using Azure DevOps secrets or variable groups.
-- **Automated Dependency Scanning: Added Snyk to scan for vulnerabilities in dependencies.
-- **Static Analysis: Trivy is used for static analysis.
-- **Build and Push Images: Docker images are built and pushed to Docker Hub.
-- **Image Scanning: Docker images are pulled and scanned for vulnerabilities using Trivy.
-- **Pull and Test Images: Docker images are pulled and tested.
+### DevSecOps
 
-
+- **Secrets Management**: Docker credentials are stored securely using Azure Devops variables.
+- **Static Analysis**: Trivy is used for static analysis.
+- **Build and Push Images**: Docker images are built and pushed to Docker Hub.
+- **Image Scanning**: Docker images are pulled and scanned for vulnerabilities using Trivy.
+- **Pull and Test Images**: Docker images are pulled and tested.
 
 ## Architecture
 
 The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built" system, showcasing the tools and workflows utilized.
 
 ![Architecture Diagram](docs/img/CICD-Architechture.png)
-
 
 ### Key Components
 
@@ -101,31 +98,40 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
 
 #### B. **Build and Test Automation**
 
-- **Azure DevOps**:
+**Azure DevOps**:
   - Orchestrates the CI/CD pipeline, ensuring that builds, tests, and deployments are fully automated.
   - Integrates with tools like GitHub and Docker to create a streamlined process from code commit to deployment.
   - Provides real-time feedback to developers about build status and test results.
+  - After successful build the pipeline will update the deployment-services.yaml
 
+  **Azure Pipelines**
+  ![CI Pipeline](docs/img/azure-pipelines.png)
+  
   **CI Pipelines**
-  ![alt text](docs/img/ado-ci-pipelines.png)
+  ![CI Pipeline](docs/img/ado-ci-pipelines.png)
+
+  **Updates to YAML from Pipelines**
+  ![YAML Updates](docs/img/yaml-updates.png)
 
   **Release Pipelines**
   ![Release Pipelines](docs/img/ado-release-pipelines.png)
 
-  **Dev AKS Deplyoment**
-  ![Dev Kube Status](docs/img/prod-kube.png)
-
-  **Prod AKS Deplyoment**
+  **Dev AKS Deployment**
   ![Dev Kube Status](docs/img/dev-kube.png)
 
+  **Prod AKS Deployment**
+  ![Prod Kube Status](docs/img/prod-kube.png)
 
-- **Azure DevOps -TODO**:
-  - Relies on external Terraform setup for environment to work
-    - When cluster is built API changes
-    - Permissions for Jenkins need to be created with cluster (kubectl)
-  - Call Terraform in pipeline
-    - Allow for tear down of resources after load testing is completed.
-    - Pipeline created cluster can be used for load or AB testing.
+> **Azure DevOps - TODO**:
+    - **Regional vCPU**
+      - Constraints in allocations requried me to keep requesting additional resources.
+      - This is cost prohibitive, so 1 pod for each service is left
+    - **Update to Terraform Apply**
+      - Currently elies on external Terraform setup for environment to work
+      - When cluster is built API changes
+      - Permissions for Jenkins need to be created with cluster (kubectl)
+    - **Separate GitOps Repo**
+      - Move deployment code to its own repo instead of a branch of this repo
 
 #### C. **Security Scanning**
 
@@ -133,13 +139,13 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
   - Scans Docker docs/img and source code for vulnerabilities, ensuring that potential security issues are caught before deployment.
   - Generates detailed reports that can be used to address vulnerabilities promptly.
 
-  ![Trivy Scan](docs/img/defaultImage.png)
+  **Trivy File Scan of /src/**
 
-- **SonarQube**:
-  - Conducts comprehensive code analysis to identify bugs, code smells, and security vulnerabilities.
-  - Provides actionable insights to improve code quality and enforce compliance with coding standards.
+  ![Trivy File Scan](docs/img/trivy-file-scan.png)
 
-  ![Sonar Report](docs/img/defaultImage.png)
+  **Trivy Image Scan results**
+
+  ![Trivy File Scan](docs/img/trivy-iamge-scan.png)
 
 #### D. **Containerization**
 
@@ -147,71 +153,30 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
   - Packages the Java application into lightweight, portable containers, ensuring consistent environments across development, testing, and production stages.
   - Simplifies deployment by abstracting underlying infrastructure differences.
 
-  *Callout Area*: Showcase Dockerfile and container registry management, explaining how this enables rapid, reliable deployments.
-
 #### E. **Container Orchestration**
 
 - **Azure Kubernetes Service (AKS)**:
   - Manages the deployment and scaling of containerized applications in a highly available environment.
   - Ensures zero downtime by automatically scaling and redistributing workloads as needed.
-  - Namespace configurations (e.g., `webapps` and `namespace 2`) isolate different parts of the system for better organization and security. The second namespace is not currently used, but is planned for a similar python web app
-  - The configuration for AKS was update from the **terraform.tf** listed in the linked repo and shown implemented below in a later section.
+  - Namespace configurations (e.g., `webapps`) isolate different parts of the system for better organization and security.
 
-- **AKS Nodes**
-  ![AKS Nodes Image](docs/img/defaultImage.png)
+<!-- REMOVE WHEN ARGO IS WORKING
+#### F. **GtiOps with ArgoCD**
 
-- **AKS CLuster**
-  ![AKS Cluster Image](docs/img/defaultImage.png)
+- **Argo Dashboard**
+  ![Argo Dashboard](docs/img/argo-dashboard.png)
 
-- **AKS Networking**
-  ![AKS Cluster Image](docs/img/defaultImage.png)
+- **Argo Sync**
+  ![Argo Dashboard](docs/img/argo-sync.png)
 
+- **Argo Updates**
+  ![Argo Updates](docs/img/argo-updates.png)
 
-<!-- REMOVE WHEN READY IF REQUIRED
-
-## Deploy Online Boutique to the cluster
-This is run during the deployment (CD) pipeline that is contigent on a successful CI pipeline completion
-
-   ```sh
-   kubectl apply -f ./release/kubernetes-manifests.yaml
-   ```
-
-### Wait for the pods to be ready.
-
-   ```sh
-   kubectl get pods
-   ```
-
-   After a few minutes, you should see the Pods in a `Running` state:
-
-   ``` tty
-   NAME                                     READY   STATUS    RESTARTS   AGE
-   adservice-76bdd69666-ckc5j               1/1     Running   0          2m58s
-   cartservice-66d497c6b7-dp5jr             1/1     Running   0          2m59s
-   checkoutservice-666c784bd6-4jd22         1/1     Running   0          3m1s
-   currencyservice-5d5d496984-4jmd7         1/1     Running   0          2m59s
-   emailservice-667457d9d6-75jcq            1/1     Running   0          3m2s
-   frontend-6b8d69b9fb-wjqdg                1/1     Running   0          3m1s
-   loadgenerator-665b5cd444-gwqdq           1/1     Running   0          3m
-   paymentservice-68596d6dd6-bf6bv          1/1     Running   0          3m
-   productcatalogservice-557d474574-888kr   1/1     Running   0          3m
-   recommendationservice-69c56b74d4-7z8r5   1/1     Running   0          3m1s
-   redis-cart-5f59546cdd-5jnqf              1/1     Running   0          2m58s
-   shippingservice-6ccc89f8fd-v686r         1/1     Running   0          2m58s
-   ```
-
-### Access the web frontend in a browser using the frontend's external IP.
-
-   ```sh
-   kubectl get service frontend-external | awk '{print $4}'
-   ```
-
-   Visit `http://EXTERNAL_IP` in a web browser to access your instance of Online Boutique.
-
-### Once you are done with it, delete the AKS cluster.
+- **Argo Rollback**
+  ![Argo Rollback](docs/img/argo-rollback.png)
 -->
 
-  
+<!-- REMOVE WHEN Monitoring IS WORKING
 #### F. **Monitoring and Observability**
 
 - **Prometheus**:
@@ -225,9 +190,9 @@ This is run during the deployment (CD) pipeline that is contigent on a successfu
   ![Grafana Image](docs/img/defaultImage.png)
 
   *Callout Area*: Include snapshots of Grafana dashboards and Prometheus query outputs, demonstrating the observability aspect of the pipeline.
+-->
 
 <!-- Removed Until IaC is added to the project
-
 #### G. **Infrastructure as Code (IaC)**
 
 - **Terraform**:
