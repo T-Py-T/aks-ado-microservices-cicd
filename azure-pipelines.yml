@@ -1,0 +1,292 @@
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - '**/deployment-service.yml'
+
+pool:
+  name: Azure Pipelines
+  vmImage: 'ubuntu-latest'
+
+pr: none
+
+variables:
+  - group: Docker
+
+jobs:
+
+  - job: StaticAnalyze
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+
+      - script: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+        displayName: Install Trivy
+
+      - script: |
+          trivy fs --severity HIGH,CRITICAL --format table .
+        displayName: Run Trivy File Scan SAST on /src
+
+  - job: BuildAndPushImages
+    dependsOn: StaticAnalyze
+    steps:
+      - task: Docker@2
+        displayName: adservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/adservice
+          Dockerfile: src/adservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: cartservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/cartservice
+          Dockerfile: src/cartservice/src/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: checkoutservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/checkoutservice
+          Dockerfile: src/checkoutservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: currencyservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/currencyservice
+          Dockerfile: src/currencyservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: emailservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/emailservice
+          Dockerfile: src/emailservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: frontend-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/frontend
+          Dockerfile: src/frontend/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: loadgenerator-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/loadgenerator
+          Dockerfile: src/loadgenerator/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: paymentservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/paymentservice
+          Dockerfile: src/paymentservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: productcatalogservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/productcatalogservice
+          Dockerfile: src/productcatalogservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: recommendationservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/recommendationservice
+          Dockerfile: src/recommendationservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: shippingservice-build-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: $(dockerUsername)/shippingservice
+          Dockerfile: src/shippingservice/Dockerfile
+          command: buildAndPush
+          tags: $(Build.BuildId)
+
+  - job: PullAndScanImages
+    dependsOn: BuildAndPushImages
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: '3.x'
+          addToPath: true
+
+      - script: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
+          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+        displayName: Install Trivy
+      
+      - script: |
+          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
+        displayName: Login to Docker Hub
+        env:
+          dockerUsername: $(dockerUsername)
+          dockerPassword: $(dockerPassword)
+
+      - script: |
+          docker pull $(dockerUsername)/adservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/adservice:$(Build.BuildId)
+        displayName: adservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/cartservice:$(Build.BuildId)
+        displayName: cartservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/checkoutservice:$(Build.BuildId)
+        displayName: checkoutservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/currencyservice:$(Build.BuildId)
+        displayName: currencyservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/emailservice:$(Build.BuildId)
+        displayName: emailservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/frontend:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/frontend:$(Build.BuildId)
+        displayName: frontend-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/loadgenerator:$(Build.BuildId)
+        displayName: loadgenerator-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/paymentservice:$(Build.BuildId)
+        displayName: paymentservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+        displayName: productcatalogservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/recommendationservice:$(Build.BuildId)
+        displayName: recommendationservice-pull-and-scan
+
+      - script: |
+          docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/shippingservice:$(Build.BuildId)
+        displayName: shippingservice-pull-and-scan
+  
+  - job: PullAndTestImages
+    dependsOn: PullAndScanImages
+    steps:
+      - script: |
+          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
+        displayName: Login to Docker Hub
+        env:
+          dockerUsername: $(dockerUsername)
+          dockerPassword: $(dockerPassword)
+
+      - script: |
+          docker pull $(dockerUsername)/adservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: adservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: cartservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: checkoutservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: currencyservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: emailservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/frontend:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: frontend-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: loadgenerator-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: paymentservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: productcatalogservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: recommendationservice-pull-and-test
+
+      - script: |
+          docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
+          # Add your custom test commands here
+        displayName: shippingservice-pull-and-test
+
+  - job: UpdateAndCommitDeploymentYAML
+    dependsOn: PullAndTestImages
+    steps:
+      - checkout: self
+        persistCredentials: true
+      - script: |
+          services=("adservice" "cartservice" "checkoutservice" "currencyservice" "emailservice" "frontend" "loadgenerator" "paymentservice" "productcatalogservice" "recommendationservice" "shippingservice")
+          for service in "${services[@]}"; do
+            sed -i "s|image: $(dockerUsername)/${service}:.*|image: $(dockerUsername)/${service}:$(Build.BuildId)|" deployment-service.yaml
+          done
+          git config user.name "azure-pipelines"
+          git config user.email "azure-pipelines@dev.azure.com"
+          git add deployment-service.yaml
+          git commit -m "Update Docker images to $(Build.BuildId) [skip ci]" || echo "No changes to commit"
+          git push origin HEAD:$(Build.SourceBranch)
+        displayName: Update and Commit Deployment YAML
+        env:
+          GIT_USERNAME: $(gitUsername)
+          GIT_PASSWORD: $(gitPassword)

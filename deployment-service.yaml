@@ -30,7 +30,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: adijaiswal/emailservice:latest
+        image: tnt850910/emailservice:latest
         ports:
         - containerPort: 8080
         env:
@@ -83,7 +83,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: adijaiswal/checkoutservice:latest
+          image: tnt850910/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:
@@ -145,7 +145,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/recommendationservice:latest
+        image: tnt850910/recommendationservice:latest
         ports:
         - containerPort: 8080
         readinessProbe:
@@ -202,7 +202,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: server
-          image: adijaiswal/frontend:latest
+          image: tnt850910/frontend:latest
           ports:
           - containerPort: 8080
           readinessProbe:
@@ -299,7 +299,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/paymentservice:latest
+        image: tnt850910/paymentservice:latest
         ports:
         - containerPort: 50051
         env:
@@ -351,7 +351,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/productcatalogservice:latest
+        image: tnt850910/productcatalogservice:latest
         ports:
         - containerPort: 3550
         env:
@@ -403,7 +403,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/cartservice:latest
+        image: tnt850910/cartservice:latest
         ports:
         - containerPort: 7070
         env:
@@ -467,7 +467,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: adijaiswal/loadgenerator:latest
+        image: tnt850910/loadgenerator:latest
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"
@@ -498,7 +498,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/currencyservice:latest
+        image: tnt850910/currencyservice:latest
         ports:
         - name: grpc
           containerPort: 7000
@@ -550,7 +550,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: server
-        image: adijaiswal/shippingservice:latest
+        image: tnt850910/shippingservice:latest
         ports:
         - containerPort: 50051
         env:
@@ -656,7 +656,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: adijaiswal/adservice:latest
+        image: tnt850910/adservice:latest
         ports:
         - containerPort: 9555
         env:

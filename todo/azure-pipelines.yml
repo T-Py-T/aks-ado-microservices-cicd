@@ -1,0 +1,201 @@
+trigger:
+  - main
+
+pool:
+  name: Azure Pipelines
+  demands:
+    - Agent.Version -gt 2.163.1
+
+
+jobs:
+  - job: Login
+    pool:
+      name: Default
+    steps:
+      - script: |
+          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
+        displayName: Login to Docker Hub
+        env:
+          dockerUsername: $(dockerUsername)
+          dockerPassword: $(dockerPassword)
+
+  - job: StaticAnalyze
+    pool:
+      name: Default
+    dependsOn: Login
+    steps:
+      - script: |
+          echo "analyze static code"
+          # echo "Executing git pull inside the container..."
+          # docker exec ignition-staging /usr/local/bin/pull-updates.sh
+        displayName: SAST
+
+  - job: BuildImages
+    pool:
+      name: Default
+    dependsOn: StaticAnalyze
+    steps:
+      - task: Docker@2
+        displayName: adservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/adservice
+          Dockerfile: src/adservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: cartservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/cartservice
+          Dockerfile: src/cartservice/src/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: checkoutservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/checkoutservice
+          Dockerfile: src/checkoutservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: currencyservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/currencyservice
+          Dockerfile: src/currencyservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: emailservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/emailservice
+          Dockerfile: src/emailservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+
+      - task: Docker@2
+        displayName: frontend-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/frontend
+          Dockerfile: src/frontend/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: loadgenerator-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/loadgenerator
+          Dockerfile: src/loadgenerator/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: paymentservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/paymentservice
+          Dockerfile: src/paymentservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: productcatalogservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/productcatalogservice
+          Dockerfile: src/productcatalogservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: recommendationservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/recommendationservice
+          Dockerfile: src/recommendationservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+      - task: Docker@2
+        displayName: shippingservice-build
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/shippingservice
+          Dockerfile: src/shippingservice/Dockerfile
+          command: build
+          tags: $(Build.BuildId)
+
+  - job: PushImages
+    pool:
+      name: Default
+    dependsOn: BuildImages
+    steps:
+      - task: Docker@2
+        displayName: adservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/adservice
+          command: push
+      - task: Docker@2
+        displayName: cartservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/cartservice
+          command: push
+      - task: Docker@2
+        displayName: checkoutservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/checkoutservice
+          command: push
+
+      - task: Docker@2
+        displayName: currencyservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/currencyservice
+          command: push
+      - task: Docker@2
+        displayName: emailservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/emailservice
+          command: push
+
+      - task: Docker@2
+        displayName: frontend-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/frontend
+          command: push
+      - task: Docker@2
+        displayName: loadgenerator-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/loadgenerator
+          command: push
+      - task: Docker@2
+        displayName: paymentservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/paymentservice
+          command: push
+      - task: Docker@2
+        displayName: productcatalogservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/productcatalogservice
+          command: push
+      - task: Docker@2
+        displayName: recommendationservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/recommendationservice
+          command: push
+      - task: Docker@2
+        displayName: shippingservice-push
+        inputs:
+          containerRegistry: Docker Hub
+          repository: tnt850910/shippingservice
+          command: push
