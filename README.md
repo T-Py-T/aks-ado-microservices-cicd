@@ -1,12 +1,56 @@
-# Azure Devops/Kubernetes microservice CI/CD
+# Repeatable AKS Delivery with Azure DevOps
 
-This DevOps project employs a comprehensive CI pipeline to automate the development and deployment process. The architecture emphasizes security, performance, and reliability, integrating industry-leading tools and practices.
+This case study uses Google Cloud's public
+[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) as
+a realistic polyglot workload for an Azure delivery system. My work is the
+platform path around the application: Azure Pipelines, image scanning,
+environment promotion, Kubernetes manifests, and the operational evidence from
+development and production AKS deployments.
 
--This project is using an example microservices demo (Google Cloud) with the link shown below.
+## The so-what
 
-> **My DevOps Scripting Examples**
-    - Re-usable examples Terraform, Bash scripts and other scripting
-      - https://github.com/T-Py-T/devops-install-scripts
+The repository answers a practical platform question:
+
+**How can one delivery contract build and promote eleven independently changing
+services across AKS environments while keeping security checks and deployed
+versions visible?**
+
+The implementation demonstrates:
+
+- a shared Azure Pipeline for build, scan, image publication, and manifest updates;
+- explicit development and production deployment targets;
+- Trivy checks against source and built images;
+- Git-recorded image-version changes for auditable promotion;
+- retained pipeline, cluster, and workload evidence rather than architecture claims alone;
+- cost constraints recorded as design input instead of hidden as an afterthought.
+
+## Ownership and evidence boundary
+
+| Area | Source | What this repository demonstrates |
+| --- | --- | --- |
+| Application services | Upstream Online Boutique | A realistic workload; not claimed as original application code |
+| Azure pipeline | Taylor-authored integration | Build, scan, publish, and manifest-update stages |
+| AKS environments | Taylor-authored deployment work | Environment separation and promotion behavior |
+| Kubernetes state | Taylor-authored manifests | Deployable versions and cluster targets |
+| Operating evidence | Retained screenshots | Pipeline runs, security scans, YAML updates, and live AKS workloads |
+
+## Inspect the proof
+
+- [Delivery architecture](docs/img/CICD-Architechture.png)
+- [Azure Pipeline](docs/img/azure-pipelines.png)
+- [CI pipeline inventory](docs/img/ado-ci-pipelines.png)
+- [Release pipelines](docs/img/ado-release-pipelines.png)
+- [Manifest version update](docs/img/yaml-updates.png)
+- [Development AKS deployment](docs/img/dev-kube.png) and [production AKS deployment](docs/img/prod-kube.png)
+- [Trivy filesystem](docs/img/trivy-file-scan.png) and [image](docs/img/trivy-iamge-scan.png) scans
+
+## Scope
+
+This is a retained deployment case study, not a claim of a currently operated
+production service. The screenshots show that the path was exercised at the
+captured point in time; they do not establish current uptime or security
+posture. The next step is a current, scripted validation packet that rebuilds a
+bounded service and verifies promotion from source to AKS.
 
 ## Application overview
 
@@ -157,7 +201,7 @@ The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built
 
 - **Azure Kubernetes Service (AKS)**:
   - Manages the deployment and scaling of containerized applications in a highly available environment.
-  - Ensures zero downtime by automatically scaling and redistributing workloads as needed.
+  - Supports horizontal scaling and rolling replacement; availability still depends on workload replicas, disruption budgets, and tested probes.
   - Namespace configurations (e.g., `webapps`) isolate different parts of the system for better organization and security.
 
 <!-- REMOVE WHEN ARGO IS WORKING
