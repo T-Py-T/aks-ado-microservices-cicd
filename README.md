@@ -1,268 +1,149 @@
-# Repeatable AKS Delivery with Azure DevOps
+# AKS Microservices Delivery with Azure DevOps
 
-This case study uses Google Cloud's public
-[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) as
-a realistic polyglot workload for an Azure delivery system. My work is the
-platform path around the application: Azure Pipelines, image scanning,
-environment promotion, Kubernetes manifests, and the operational evidence from
-development and production AKS deployments.
+An Azure DevOps delivery pipeline for
+[Google Cloud's Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo),
+a polyglot e-commerce application made of eleven gRPC services.
 
-## The so-what
+The repository adds an Azure delivery path around the upstream application:
+source scanning, per-service container builds, image scanning, runtime tests,
+manifest version updates, and separate AKS deployments.
 
-The repository answers a practical platform question:
+![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
-**How can one delivery contract build and promote eleven independently changing
-services across AKS environments while keeping security checks and deployed
-versions visible?**
+## How the pipeline works
 
-The implementation demonstrates:
+```text
+source change
+    │
+    ▼
+Trivy filesystem scan
+    │
+    ▼
+build and publish 11 service images
+    │
+    ▼
+pull and scan each image
+    │
+    ▼
+run container health checks
+    │
+    ▼
+update deployment-service.yaml with the build version
+    │
+    ▼
+deploy to the selected AKS environment
+```
 
-- a shared Azure Pipeline for build, scan, image publication, and manifest updates;
-- explicit development and production deployment targets;
-- Trivy checks against source and built images;
-- Git-recorded image-version changes for auditable promotion;
-- retained pipeline, cluster, and workload evidence rather than architecture claims alone;
-- cost constraints recorded as design input instead of hidden as an afterthought.
+[`azure-pipelines.yml`](azure-pipelines.yml) contains the build and scan jobs.
+[`deployment-service.yaml`](deployment-service.yaml) defines the service
+deployments, ports, probes, resource requests, and service-to-service addresses.
 
-## Ownership and evidence boundary
+## Application services
 
-| Area | Source | What this repository demonstrates |
+| Service | Language | Responsibility |
 | --- | --- | --- |
-| Application services | Upstream Online Boutique | A realistic workload; not claimed as original application code |
-| Azure pipeline | Taylor-authored integration | Build, scan, publish, and manifest-update stages |
-| AKS environments | Taylor-authored deployment work | Environment separation and promotion behavior |
-| Kubernetes state | Taylor-authored manifests | Deployable versions and cluster targets |
-| Operating evidence | Retained screenshots | Pipeline runs, security scans, YAML updates, and live AKS workloads |
+| `frontend` | Go | Browser-facing store and session handling |
+| `cartservice` | C# | Redis-backed cart storage |
+| `productcatalogservice` | Go | Product listing and search |
+| `currencyservice` | Node.js | Currency conversion |
+| `paymentservice` | Node.js | Mock payment processing |
+| `shippingservice` | Go | Shipping estimates |
+| `emailservice` | Python | Mock order-confirmation email |
+| `checkoutservice` | Go | Checkout workflow orchestration |
+| `recommendationservice` | Python | Product recommendations |
+| `adservice` | Java | Contextual text ads |
+| `loadgenerator` | Python/Locust | Synthetic browsing and checkout traffic |
 
-## Inspect the proof
+[![Online Boutique service architecture](docs/img/architecture-diagram.png)](docs/img/architecture-diagram.png)
 
-- [Delivery architecture](docs/img/CICD-Architechture.png)
-- [Azure Pipeline](docs/img/azure-pipelines.png)
-- [CI pipeline inventory](docs/img/ado-ci-pipelines.png)
-- [Release pipelines](docs/img/ado-release-pipelines.png)
-- [Manifest version update](docs/img/yaml-updates.png)
-- [Development AKS deployment](docs/img/dev-kube.png) and [production AKS deployment](docs/img/prod-kube.png)
-- [Trivy filesystem](docs/img/trivy-file-scan.png) and [image](docs/img/trivy-iamge-scan.png) scans
+The application code comes from Online Boutique. The Azure Pipeline,
+environment promotion flow, image-version updates, and AKS integration are the
+repository-specific work.
 
-## Scope
+## Prerequisites
 
-This is a retained deployment case study, not a claim of a currently operated
-production service. The screenshots show that the path was exercised at the
-captured point in time; they do not establish current uptime or security
-posture. The next step is a current, scripted validation packet that rebuilds a
-bounded service and verifies promotion from source to AKS.
+- an Azure DevOps project and pipeline;
+- an Azure Container Registry or Docker Hub service connection;
+- development and production AKS clusters;
+- `kubectl` access to the target cluster; and
+- Trivy available in the build agent, or permission for the pipeline to install it.
 
-## Application overview
+The pipeline expects an Azure DevOps variable group named `Docker` and a
+container registry service connection named `Docker Hub`. Update those names
+and the image repository values to match your environment.
 
-[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo) is a cloud-first microservices demo application consisting of 11 microservices applications. The application is a web-based e-commerce app where users can browse items, add them to the cart, and purchase them.
+Keep registry passwords and Azure credentials in variable groups or service
+connections. Do not commit them to this repository.
 
-### Application Architecture
+## Local validation
 
-Each of the 11 microservices written in different languages that talk to each other over gRPC.
+Check that the pipeline and Kubernetes files are valid YAML:
 
-[![Architecture of microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+```bash
+python -m pip install pyyaml
+python - <<'PY'
+from pathlib import Path
+import yaml
 
-Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
-
-| Service | Language |   Description     |
-| -------| --------| -------- |
-| [frontend](/src/frontend) | Go    | Exposes an HTTP server to serve the website. Does not require signup/login and generates session IDs for all users automatically. |
-| [cartservice](/src/cartservice) | C#  | Stores the items in the user's shopping cart in Redis and retrieves it.   |
-| [productcatalogservice](/src/productcatalogservice) | Go   | Provides the list of products from a JSON file and ability to search products and get individual products.  |
-| [currencyservice](/src/currencyservice) | Node.js   | Converts one money amount to another currency. Uses real values fetched from European Central Bank. It's the highest QPS service. |
-| [paymentservice](/src/paymentservice)  | Node.js       | Charges the given credit card info (mock) with the given amount and returns a transaction ID.                                     |
-| [shippingservice](/src/shippingservice)             | Go            | Gives shipping cost estimates based on the shopping cart. Ships items to the given address (mock)                                 |
-| [emailservice](/src/emailservice)                   | Python        | Sends users an order confirmation email (mock).                                                                                   |
-| [checkoutservice](/src/checkoutservice)             | Go            | Retrieves user cart, prepares order and orchestrates the payment, shipping and the email notification.                            |
-| [recommendationservice](/src/recommendationservice) | Python        | Recommends other products based on what's given in the cart.                                                                      |
-| [adservice](/src/adservice)                         | Java          | Provides text ads based on given context words.                                                                                   |
-| [loadgenerator](/src/loadgenerator)                 | Python/Locust | Continuously sends requests imitating realistic user shopping flows to the frontend.     |
-
-### Screenshots
-
-| Home Page | Checkout Screen |
-| ------- | ----- |
-| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
-
-## Features
-
-- **[Kubernetes](https://kubernetes.io)/[AKS](https://azure.microsoft.com/en-us/products/kubernetes-service):**
-  The app is designed to run on Kubernetes (both locally on "Docker for Desktop", as well as on the cloud with AKS).
-- **[gRPC](https://grpc.io):** Microservices use a high volume of gRPC calls to communicate to each other.
-- **Synthetic Load Generation:** The application demo comes with a background job that creates realistic usage patterns on the website using [Locust](https://locust.io/) load generator.
-
-<!-- 
-**************** TODO SECTION 
-
-> # Note: This is a reminder to come back and update this section.
-- [ ] Add screenshots of monitoring dashboards
-- [ ] Describe log aggregation strategy
-- [ ] Combine AKS definition (2 sections)
-- [ ] Update the 
-- [ ] Add Istio config/images/section
-- [ ] Add ArgoCD Images/Section
-- [ ] Terraform Section?
-- [ ] Prometheus Section? 
--->
-
-## Best Practices Followed
-
-### DevOps
-
-- **Automation**: The build, test, and deployment process is automated, reducing the risk of human error and speeding up the cycle times. Automation ensures that every code change is tested and validated before deployment.
-- **Security First**: Integrating Aqua Trivy ensures that security vulnerabilities and code quality issues are detected and addressed early in the pipeline, fostering a secure development lifecycle.
-- **Scalability**: Kubernetes provides a scalable infrastructure that can handle fluctuating loads, ensuring consistent performance during peak traffic.
-- **Version Control and Code Review**: GitHub serves as the foundation for collaboration and quality control, ensuring that only well-reviewed, high-quality code reaches production.
-<!-- - **Observability**: Using istio allows real-time monitoring, enabling proactive identification and resolution of potential issues before they impact users.
-- **GitOps with ArgoCD**: Using the repo monitoring of ArgoCD, we are able to detect changes in the mainfest of the repository and sync the changes into the Kubernetes environment. -->
-
-### DevSecOps
-
-- **Secrets Management**: Docker credentials are stored securely using Azure Devops variables.
-- **Static Analysis**: Trivy is used for static analysis.
-- **Build and Push Images**: Docker images are built and pushed to Docker Hub.
-- **Image Scanning**: Docker images are pulled and scanned for vulnerabilities using Trivy.
-- **Pull and Test Images**: Docker images are pulled and tested.
-
-## Architecture
-
-The CI/CD pipeline is depicted in the diagram below, which mirrors the "as-built" system, showcasing the tools and workflows utilized.
-
-![Architecture Diagram](docs/img/CICD-Architechture.png)
-
-### Key Components
-
-#### A. **Source Code Management**
-
-- **GitHub**:
-  - Serves as the backbone of version control, ensuring seamless collaboration among team members.
-  - Pull requests and branch strategies help enforce coding standards and encourage peer reviews.
-  - Integrated with Jenkins to trigger automated builds and tests upon code commits, ensuring continuous integration.
-  - Setup with the Azure Devops Project with connection to the git repository
-
-#### B. **Build and Test Automation**
-
-**Azure DevOps**:
-  - Orchestrates the CI/CD pipeline, ensuring that builds, tests, and deployments are fully automated.
-  - Integrates with tools like GitHub and Docker to create a streamlined process from code commit to deployment.
-  - Provides real-time feedback to developers about build status and test results.
-  - After successful build the pipeline will update the deployment-services.yaml
-
-  **Azure Pipelines**
-  ![CI Pipeline](docs/img/azure-pipelines.png)
-  
-  **CI Pipelines**
-  ![CI Pipeline](docs/img/ado-ci-pipelines.png)
-
-  **Updates to YAML from Pipelines**
-  ![YAML Updates](docs/img/yaml-updates.png)
-
-  **Release Pipelines**
-  ![Release Pipelines](docs/img/ado-release-pipelines.png)
-
-  **Dev AKS Deployment**
-  ![Dev Kube Status](docs/img/dev-kube.png)
-
-  **Prod AKS Deployment**
-  ![Prod Kube Status](docs/img/prod-kube.png)
-
-> **Azure DevOps - TODO**:
-    - **Regional vCPU**
-      - Constraints in allocations requried me to keep requesting additional resources.
-      - This is cost prohibitive, so 1 pod for each service is left
-    - **Update to Terraform Apply**
-      - Currently elies on external Terraform setup for environment to work
-      - When cluster is built API changes
-      - Permissions for Jenkins need to be created with cluster (kubectl)
-    - **Separate GitOps Repo**
-      - Move deployment code to its own repo instead of a branch of this repo
-
-#### C. **Security Scanning**
-
-- **Aqua Trivy**:
-  - Scans Docker docs/img and source code for vulnerabilities, ensuring that potential security issues are caught before deployment.
-  - Generates detailed reports that can be used to address vulnerabilities promptly.
-
-  **Trivy File Scan of /src/**
-
-  ![Trivy File Scan](docs/img/trivy-file-scan.png)
-
-  **Trivy Image Scan results**
-
-  ![Trivy File Scan](docs/img/trivy-iamge-scan.png)
-
-#### D. **Containerization**
-
-- **Docker**:
-  - Packages the Java application into lightweight, portable containers, ensuring consistent environments across development, testing, and production stages.
-  - Simplifies deployment by abstracting underlying infrastructure differences.
-
-#### E. **Container Orchestration**
-
-- **Azure Kubernetes Service (AKS)**:
-  - Manages the deployment and scaling of containerized applications in a highly available environment.
-  - Supports horizontal scaling and rolling replacement; availability still depends on workload replicas, disruption budgets, and tested probes.
-  - Namespace configurations (e.g., `webapps`) isolate different parts of the system for better organization and security.
-
-<!-- REMOVE WHEN ARGO IS WORKING
-#### F. **GtiOps with ArgoCD**
-
-- **Argo Dashboard**
-  ![Argo Dashboard](docs/img/argo-dashboard.png)
-
-- **Argo Sync**
-  ![Argo Dashboard](docs/img/argo-sync.png)
-
-- **Argo Updates**
-  ![Argo Updates](docs/img/argo-updates.png)
-
-- **Argo Rollback**
-  ![Argo Rollback](docs/img/argo-rollback.png)
--->
-
-<!-- REMOVE WHEN Monitoring IS WORKING
-#### F. **Monitoring and Observability**
-
-- **Prometheus**:
-  - Collects metrics from various components of the application and infrastructure, providing deep insights into system health and performance.
-  - Supports custom queries to detect anomalies and trigger alerts proactively.
-  ![Prometheus Image](docs/img/defaultImage.png)
-
-- **Grafana**:
-  - Provides user-friendly dashboards for visualizing Prometheus metrics.
-  - Enables stakeholders to monitor key performance indicators (KPIs) in real-time, ensuring system reliability.
-  ![Grafana Image](docs/img/defaultImage.png)
-
-  *Callout Area*: Include snapshots of Grafana dashboards and Prometheus query outputs, demonstrating the observability aspect of the pipeline.
--->
-
-<!-- Removed Until IaC is added to the project
-#### G. **Infrastructure as Code (IaC)**
-
-- **Terraform**:
-  - Automates the provisioning and management of infrastructure required for the Kubernetes stack that hosts the Java application.
-  - Ensures infrastructure consistency and repeatability by defining it as code.
-  - The following key AWS resources are provisioned:
-    - **VPC**: Creates a virtual private cloud for network isolation.
-    - **Subnets**: Two public subnets in `us-east-1a` and `us-east-1b` availability zones.
-    - **Internet Gateway**: Provides internet access to the resources within the VPC.
-    - **Route Tables and Associations**: Configures routing for the subnets to allow public internet access.
-    - **Security Groups**: Defines rules for cluster and node communication, ensuring controlled ingress and egress.
-    - **AKS Cluster**: Deploys an Azure Kubernetes Service cluster for managing the application containers.
-    - **AKS Node Group**: Provisions a scalable worker node group with `t2.large` instances to support container workloads.
-    - **IAM Roles and Policies**: Configures roles and permissions for both the AKS cluster and node group to interact with AWS services.
-  - Facilitates rapid updates and scaling of infrastructure to match application requirements.
-
-``` bash
-terraform plan
+for path in (Path("azure-pipelines.yml"), Path("deployment-service.yaml")):
+    list(yaml.safe_load_all(path.read_text()))
+    print(f"ok: {path}")
+PY
 ```
 
-![Terraform Plan](docs/img/TerraformPlan.png)
+Service-specific tests live with each application under `src/<service>/` and
+use that service's native toolchain. For example:
 
-``` bash
-terraform apply --auto-approve
+```bash
+cd src/shippingservice
+go test ./...
 ```
 
-![Terraform Apply](docs/img/TerraformApply.png)
-![Terraform Output](docs/img/Terraform-Output.png) 
--->
+## Azure DevOps setup
+
+1. Import or connect this repository to Azure Repos/Pipelines.
+2. Create the container registry service connection.
+3. Create the `Docker` variable group with `dockerUsername` and a secret
+   `dockerPassword`.
+4. Update the image repository names in `azure-pipelines.yml`.
+5. Configure AKS service connections for the development and production
+   environments.
+6. Run the pipeline and review the Trivy results before promoting the generated
+   image versions.
+
+The manifest update job records the pipeline build ID in
+`deployment-service.yaml`, giving each deployment an explicit set of service
+versions.
+
+## Deployment
+
+Apply the generated manifest to a configured cluster:
+
+```bash
+az aks get-credentials --resource-group <resource-group> --name <cluster>
+kubectl apply --dry-run=server -f deployment-service.yaml
+kubectl apply -f deployment-service.yaml
+kubectl rollout status deployment/frontend
+kubectl get pods,svc
+```
+
+The frontend is exposed through a Kubernetes service; the remaining services
+communicate over gRPC using the DNS names declared in the manifest.
+
+## Screenshots
+
+| Stage | Capture |
+| --- | --- |
+| Azure Pipeline | ![Azure Pipeline](docs/img/azure-pipelines.png) |
+| Manifest update | ![Updated image versions](docs/img/yaml-updates.png) |
+| Development AKS | ![Development deployment](docs/img/dev-kube.png) |
+| Production AKS | ![Production deployment](docs/img/prod-kube.png) |
+| Trivy filesystem scan | ![Trivy filesystem scan](docs/img/trivy-file-scan.png) |
+| Trivy image scan | ![Trivy image scan](docs/img/trivy-iamge-scan.png) |
+
+## License
+
+Repository-specific pipeline, deployment, and documentation work is available
+under the [MIT License](LICENSE). Online Boutique source files retain Google
+LLC's Apache License 2.0 notices. See
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
