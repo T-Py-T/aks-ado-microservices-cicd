@@ -5,8 +5,8 @@ An Azure DevOps delivery pipeline for
 a polyglot e-commerce application made of eleven gRPC services.
 
 The repository adds an Azure delivery path around the upstream application:
-source scanning, per-service container builds, image scanning, runtime tests,
-manifest version updates, and separate AKS deployments.
+source scanning, per-service container builds, image scanning, manifest version
+updates, and a Kubernetes definition for an operator-controlled AKS deployment.
 
 ![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
@@ -25,13 +25,10 @@ build and publish 11 service images
 pull and scan each image
     │
     ▼
-run container health checks
-    │
-    ▼
 update deployment-service.yaml with the build version
     │
     ▼
-deploy to the selected AKS environment
+review and apply the manifest to an AKS environment
 ```
 
 [`azure-pipelines.yml`](azure-pipelines.yml) contains the build and scan jobs.
@@ -64,7 +61,7 @@ repository-specific work.
 
 - an Azure DevOps project and pipeline;
 - an Azure Container Registry or Docker Hub service connection;
-- development and production AKS clusters;
+- a target AKS cluster;
 - `kubectl` access to the target cluster; and
 - Trivy available in the build agent, or permission for the pipeline to install it.
 
@@ -77,26 +74,45 @@ connections. Do not commit them to this repository.
 
 ## Local validation
 
-Check that the pipeline and Kubernetes files are valid YAML:
+Install pre-commit, then run the repository policy checks:
 
 ```bash
-python -m pip install pyyaml
-python - <<'PY'
-from pathlib import Path
-import yaml
-
-for path in (Path("azure-pipelines.yml"), Path("deployment-service.yaml")):
-    list(yaml.safe_load_all(path.read_text()))
-    print(f"ok: {path}")
-PY
+python -m pip install pre-commit
+pre-commit run --all-files
 ```
 
-Service-specific tests live with each application under `src/<service>/` and
-use that service's native toolchain. For example:
+Service-specific tests live under `src/<service>/` and use each service's
+native toolchain. Run the Go and .NET suites with:
 
 ```bash
-cd src/shippingservice
-go test ./...
+for service in checkoutservice frontend productcatalogservice shippingservice; do
+  (cd "src/$service" && go test ./...)
+done
+dotnet test src/cartservice/tests/cartservice.tests.csproj --configuration Release
+```
+
+Audit the resolved Node and Python dependency sets with:
+
+```bash
+(cd src/currencyservice && npm ci && npm audit --omit=dev)
+(cd src/paymentservice && npm ci && npm audit --omit=dev)
+node tests/node_service_smoke.js src/currencyservice server.js "CurrencyService gRPC server started" 17000
+node tests/node_service_smoke.js src/paymentservice index.js "PaymentService gRPC server started" 15000
+python -m pip install pip-audit
+pip-audit -r src/emailservice/requirements.txt
+pip-audit -r src/recommendationservice/requirements.txt
+pip-audit -r src/loadgenerator/requirements.txt
+```
+
+The pull-request gate runs the same language-level checks before a branch can
+merge. Container definitions pin every external parent image by digest. Grype
+exceptions in [`.grype.yaml`](.grype.yaml) apply only to advisories whose fixes
+require a prerelease runtime.
+
+Validate the Kubernetes resources offline with:
+
+```bash
+go run github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0 -strict -summary deployment-service.yaml
 ```
 
 ## Azure DevOps setup
@@ -106,14 +122,14 @@ go test ./...
 3. Create the `Docker` variable group with `dockerUsername` and a secret
    `dockerPassword`.
 4. Update the image repository names in `azure-pipelines.yml`.
-5. Configure AKS service connections for the development and production
-   environments.
-6. Run the pipeline and review the Trivy results before promoting the generated
-   image versions.
+5. Start the pipeline manually and review the Trivy results before promoting
+   the generated image versions.
+6. Review the updated manifest, then apply it to the intended AKS environment.
 
 The manifest update job records the pipeline build ID in
 `deployment-service.yaml`, giving each deployment an explicit set of service
-versions.
+versions. Automatic Azure Pipeline triggers are disabled because the pipeline
+publishes images and writes the selected build version back to the manifest.
 
 ## Deployment
 

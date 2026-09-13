@@ -12,15 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM python:3.11.1-slim@sha256:33a1008485e1a2dc565be79ece483b240cbc4d6266d6144a57a5a9965ede9bbf as base
+FROM --platform=$BUILDPLATFORM python:3.14.7-alpine@sha256:c6ead215bfd31f1e433d968853b7a769989117115b728874824e6c0a27cb96fc AS base
 
-FROM base as builder
+FROM base AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apk upgrade --no-cache \
+    && apk add --no-cache g++ linux-headers \
+    && rm -rf /var/cache/apk/*
 
 COPY requirements.txt .
 
 RUN pip install --prefix="/install" -r requirements.txt
 
 FROM base
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+RUN apk upgrade --no-cache \
+    && apk add --no-cache libstdc++ \
+    && rm -rf /var/cache/apk/*
 
 WORKDIR /loadgen
 
@@ -32,4 +46,4 @@ COPY locustfile.py .
 # enable gevent support in debugger
 ENV GEVENT_SUPPORT=True
 
-ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" 2>&1
+ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --headless -u "${USERS:-10}" -r "${RATE:-1}" 2>&1

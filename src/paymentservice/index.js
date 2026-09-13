@@ -16,42 +16,38 @@
 
 'use strict';
 
+const logger = require('./logger')
 
-if(process.env.DISABLE_PROFILER) {
-  console.log("Profiler disabled.")
-}
-else {
-  console.log("Profiler enabled.")
-  require('@google-cloud/profiler').start({
-    serviceContext: {
-      service: 'paymentservice',
-      version: '1.0.0'
-    }
-  });
-}
+if (process.env.ENABLE_TRACING == "1") {
+  logger.info("Tracing enabled.")
 
+  const { resourceFromAttributes } = require('@opentelemetry/resources');
 
-if(process.env.ENABLE_TRACING == "1") {
-  console.log("Tracing enabled.")
-  const { NodeTracerProvider } = require('@opentelemetry/sdk-trace-node');
-  const { SimpleSpanProcessor } = require('@opentelemetry/sdk-trace-base');
+  const { ATTR_SERVICE_NAME }= require('@opentelemetry/semantic-conventions');
+
   const { GrpcInstrumentation } = require('@opentelemetry/instrumentation-grpc');
   const { registerInstrumentations } = require('@opentelemetry/instrumentation');
-  const { OTLPTraceExporter } = require("@opentelemetry/exporter-otlp-grpc");
+  const opentelemetry = require('@opentelemetry/sdk-node');
 
-  const provider = new NodeTracerProvider();
-  
-  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR
+  const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
 
-  provider.addSpanProcessor(new SimpleSpanProcessor(new OTLPTraceExporter({url: collectorUrl})));
-  provider.register();
+  const collectorUrl = process.env.COLLECTOR_SERVICE_ADDR;
+  const traceExporter = new OTLPTraceExporter({url: collectorUrl});
+
+  const sdk = new opentelemetry.NodeSDK({
+    resource: resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME || 'paymentservice',
+    }),
+    traceExporter: traceExporter,
+  });
 
   registerInstrumentations({
     instrumentations: [new GrpcInstrumentation()]
   });
-}
-else {
-  console.log("Tracing disabled.")
+
+  sdk.start()
+} else {
+  logger.info("Tracing disabled.")
 }
 
 
