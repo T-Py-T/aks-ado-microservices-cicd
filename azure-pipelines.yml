@@ -1,10 +1,4 @@
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    exclude:
-      - '**/deployment-service.yml'
+trigger: none
 
 pool:
   name: Azure Pipelines
@@ -27,12 +21,15 @@ jobs:
       - script: |
           sudo apt-get update
           sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
-          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+          trivy_version=0.74.0
+          wget "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_Linux-64bit.deb"
+          wget "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_checksums.txt"
+          grep " trivy_${trivy_version}_Linux-64bit.deb$" "trivy_${trivy_version}_checksums.txt" | sha256sum --check -
+          sudo dpkg -i "trivy_${trivy_version}_Linux-64bit.deb"
         displayName: Install Trivy
 
       - script: |
-          trivy fs --severity HIGH,CRITICAL --format table .
+          trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table .
         displayName: Run Trivy File Scan SAST on /src
 
   - job: BuildAndPushImages
@@ -140,8 +137,11 @@ jobs:
       - script: |
           sudo apt-get update
           sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.29.2/trivy_0.29.2_Linux-64bit.deb
-          sudo dpkg -i trivy_0.29.2_Linux-64bit.deb
+          trivy_version=0.74.0
+          wget "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_Linux-64bit.deb"
+          wget "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_checksums.txt"
+          grep " trivy_${trivy_version}_Linux-64bit.deb$" "trivy_${trivy_version}_checksums.txt" | sha256sum --check -
+          sudo dpkg -i "trivy_${trivy_version}_Linux-64bit.deb"
         displayName: Install Trivy
       
       - script: |
@@ -153,126 +153,61 @@ jobs:
 
       - script: |
           docker pull $(dockerUsername)/adservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/adservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/adservice:$(Build.BuildId)
         displayName: adservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/cartservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/cartservice:$(Build.BuildId)
         displayName: cartservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/checkoutservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/checkoutservice:$(Build.BuildId)
         displayName: checkoutservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/currencyservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/currencyservice:$(Build.BuildId)
         displayName: currencyservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/emailservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/emailservice:$(Build.BuildId)
         displayName: emailservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/frontend:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/frontend:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/frontend:$(Build.BuildId)
         displayName: frontend-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/loadgenerator:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/loadgenerator:$(Build.BuildId)
         displayName: loadgenerator-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/paymentservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/paymentservice:$(Build.BuildId)
         displayName: paymentservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/productcatalogservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/productcatalogservice:$(Build.BuildId)
         displayName: productcatalogservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/recommendationservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/recommendationservice:$(Build.BuildId)
         displayName: recommendationservice-pull-and-scan
 
       - script: |
           docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
-          trivy image --severity HIGH,CRITICAL --format table $(dockerUsername)/shippingservice:$(Build.BuildId)
+          trivy image --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --format table $(dockerUsername)/shippingservice:$(Build.BuildId)
         displayName: shippingservice-pull-and-scan
   
-  - job: PullAndTestImages
-    dependsOn: PullAndScanImages
-    steps:
-      - script: |
-          docker login -u $(dockerUsername) -p $(dockerPassword) docker.io
-        displayName: Login to Docker Hub
-        env:
-          dockerUsername: $(dockerUsername)
-          dockerPassword: $(dockerPassword)
-
-      - script: |
-          docker pull $(dockerUsername)/adservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: adservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/cartservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: cartservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/checkoutservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: checkoutservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/currencyservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: currencyservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/emailservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: emailservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/frontend:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: frontend-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/loadgenerator:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: loadgenerator-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/paymentservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: paymentservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/productcatalogservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: productcatalogservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/recommendationservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: recommendationservice-pull-and-test
-
-      - script: |
-          docker pull $(dockerUsername)/shippingservice:$(Build.BuildId)
-          # Add your custom test commands here
-        displayName: shippingservice-pull-and-test
-
   - job: UpdateAndCommitDeploymentYAML
-    dependsOn: PullAndTestImages
+    dependsOn: PullAndScanImages
     steps:
       - checkout: self
         persistCredentials: true

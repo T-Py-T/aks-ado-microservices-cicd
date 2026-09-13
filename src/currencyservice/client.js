@@ -15,16 +15,16 @@
  * limitations under the License.
  *
  */
-require('@google-cloud/trace-agent').start();
-
 const path = require('path');
-const grpc = require('grpc');
+const grpc = require('@grpc/grpc-js');
+const protoLoader = require('@grpc/proto-loader');
 const pino = require('pino');
 
 const PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const PORT = 7000;
 
-const shopProto = grpc.load(PROTO_PATH).hipstershop;
+const packageDefinition = protoLoader.loadSync(PROTO_PATH);
+const shopProto = grpc.loadPackageDefinition(packageDefinition).hipstershop;
 const client = new shopProto.CurrencyService(`localhost:${PORT}`,
   grpc.credentials.createInsecure());
 
