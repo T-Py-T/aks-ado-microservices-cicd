@@ -1,5 +1,8 @@
 # AKS Microservices Delivery with Azure DevOps
 
+[![PR Checks](https://github.com/T-Py-T/aks-ado-microservices-cicd/actions/workflows/pr-checks.yml/badge.svg?branch=main)](https://github.com/T-Py-T/aks-ado-microservices-cicd/actions/workflows/pr-checks.yml)
+
+
 An Azure DevOps delivery pipeline for
 [Google Cloud's Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo),
 a polyglot e-commerce application made of eleven gRPC services.
