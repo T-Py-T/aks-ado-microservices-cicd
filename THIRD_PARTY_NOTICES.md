@@ -8,3 +8,8 @@ and are distributed under Apache License 2.0.
 The root MIT license applies to repository-specific pipeline, deployment, and
 documentation work. It does not replace the Apache License 2.0 terms attached
 to Online Boutique code or the licenses of third-party dependencies.
+
+## License scope
+
+This license covers repository-specific work. Third-party files remain under
+their original licenses and copyright notices.
