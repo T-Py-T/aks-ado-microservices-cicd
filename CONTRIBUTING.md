@@ -1,5 +1,7 @@
 # Contributing
 
+> Tip-cite: main `f1aff2a9` + PR #55.
+
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
 documentation around the upstream Online Boutique application.
