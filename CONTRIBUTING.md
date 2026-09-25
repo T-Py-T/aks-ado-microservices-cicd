@@ -1,6 +1,6 @@
 # Contributing
 
-> Tip-cite: main `ef190be6` + PR #TBD. Steward resolves; never READY.
+> Tip-cite: main `ef190be6` + PR #69. Steward resolves; never READY.
 
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
