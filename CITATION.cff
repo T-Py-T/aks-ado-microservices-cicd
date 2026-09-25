@@ -1,0 +1,9 @@
+# Tip-cite: base main `1ef8d0c3` + Ship 163. Steward resolves after merge; this pointer is not approval and never `READY`.
+cff-version: 1.2.0
+message: "If you use this repository, please cite it."
+title: "AKS Microservices Delivery with Azure DevOps"
+type: software
+authors:
+  - name: "T_Py_T"
+    email: "tnt850910@aol.com"
+url: "https://github.com/T-Py-T/aks-ado-microservices-cicd"
