@@ -1,10 +1,17 @@
 # Contributing
 
-> Tip-cite: main `f1aff2a9` + PR #55.
+> Tip-cite: main `ef190be6` + PR #69. Steward resolves; never READY.
 
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
 documentation around the upstream Online Boutique application.
+
+## Evidence boundaries
+
+- [Open problems and held decisions](docs/OPEN_PROBLEMS.md) records active evidence
+  gaps and held decisions; it is not a scorecard or `READY` gate.
+- [README: Hireability / what this proves](README.md#hireability--what-this-proves)
+  describes the repository evidence boundaries and non-claims.
 
 ## Before opening a pull request
 
