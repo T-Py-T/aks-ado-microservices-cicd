@@ -190,7 +190,7 @@ LLC's Apache License 2.0 notices. See
 
 > Tip-cite bank:
 > - Ship 31 / PR #66: T-Py-T/aks-ado-microservices-cicd `207755f9`
-> - Ship 37 / PR #PR TBD: T-Py-T/aks-ado-microservices-cicd `SHIP37TIP`
+> - Ship 37 / PR #67: T-Py-T/aks-ado-microservices-cicd `d1812187`
 
 The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
 `READY` claim and reports no invented score; no readiness conclusion is asserted.
