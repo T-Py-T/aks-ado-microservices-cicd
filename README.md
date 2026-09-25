@@ -186,8 +186,10 @@ polyglot microservices application. It demonstrates that I can:
 
 These are implementation and documentation signals, not a claim of production
 uptime, measured delivery improvement, security certification, or a readiness
-score. The repository does not assert `READY`; the Steward resolves cited tips
-against `main`.
+score. See [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) for the active
+evidence gaps and held decisions that bound this narrative; it is not a
+scorecard or `READY` gate. The repository does not assert `READY`; the Steward
+resolves cited tips against `main`.
 
 ## Screenshots
 
