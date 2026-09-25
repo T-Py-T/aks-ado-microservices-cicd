@@ -213,6 +213,7 @@ LLC's Apache License 2.0 notices. See
 > - Ship 31 / PR #66: T-Py-T/aks-ado-microservices-cicd `207755f9`
 > - Ship 37 / PR #67: T-Py-T/aks-ado-microservices-cicd `d1812187`
 > - Ship 49 / PR #68: T-Py-T/aks-ado-microservices-cicd `880adbd4`
+> - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
 
 The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
 `READY` claim and reports no invented score; no readiness conclusion is asserted.
