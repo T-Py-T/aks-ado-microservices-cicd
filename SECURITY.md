@@ -1,6 +1,6 @@
 # Security policy
 
-> Tip-cite: main `18425809` + PR #71. Steward resolves; never READY.
+> Tip-cite: main `a4a50522` + PR #71. Steward resolves; never READY.
 
 This policy makes no `READY` claim and does not provide a score or security
 certification. For unresolved evidence gaps and held decisions, see the [open
