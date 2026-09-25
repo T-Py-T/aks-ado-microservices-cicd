@@ -13,6 +13,22 @@ updates, and a Kubernetes definition for an operator-controlled AKS deployment.
 
 ![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
+## Architecture and evidence path
+
+Use the architecture image as the map, then follow the repository paths that
+carry each delivery step:
+
+1. [`azure-pipelines.yml`](azure-pipelines.yml) shows source scanning, the
+   eleven image builds, image scans, and manifest-version update.
+2. [`deployment-service.yaml`](deployment-service.yaml) shows the AKS-facing
+   workloads, probes, resources, ports, and service-to-service addresses.
+3. [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) records evidence gaps and
+   held decisions; it keeps repository evidence separate from authorized Azure
+   DevOps, registry, and live-cluster evidence.
+
+This path makes the implementation reviewable without treating diagrams,
+source files, or screenshots as proof of current live deployment state.
+
 ## How the pipeline works
 
 ```text
