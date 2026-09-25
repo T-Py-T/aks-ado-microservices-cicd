@@ -149,6 +149,25 @@ kubectl get pods,svc
 The frontend is exposed through a Kubernetes service; the remaining services
 communicate over gRPC using the DNS names declared in the manifest.
 
+## Hireability / what this proves
+
+This repository is a compact, reviewable example of delivery ownership for a
+polyglot microservices application. It demonstrates that I can:
+
+- map source changes to repeatable build, image-scan, publish, and
+  manifest-update stages in Azure DevOps;
+- describe Kubernetes delivery details—service-to-service addresses, probes,
+  resource requests, image versions, and rollout checks—without hiding the
+  operational steps; and
+- keep delivery evidence bounded: credentials stay in service connections or
+  variable groups, promotion is reviewed before apply, and the documented
+  checks are reproducible from the repository.
+
+These are implementation and documentation signals, not a claim of production
+uptime, measured delivery improvement, security certification, or a readiness
+score. The repository does not assert `READY`; the Steward resolves cited tips
+against `main`.
+
 ## Screenshots
 
 | Stage | Capture |
@@ -169,8 +188,10 @@ LLC's Apache License 2.0 notices. See
 
 ## Evidence status
 
-> Tip-cite (bank format): T-Py-T/aks-ado-microservices-cicd #66 `207755f9`
+> Tip-cite bank:
+> - Ship 31 / PR #66: T-Py-T/aks-ado-microservices-cicd `207755f9`
+> - Ship 37 / PR #67: T-Py-T/aks-ado-microservices-cicd `d1812187`
 
 The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
 `READY` claim and reports no invented score; no readiness conclusion is asserted.
-The Steward resolves the short tip against `main` when a full SHA is needed.
+The Steward resolves each 8-character tip against `main` when a full SHA is needed.
