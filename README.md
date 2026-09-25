@@ -166,3 +166,11 @@ Repository-specific pipeline, deployment, and documentation work is available
 under the [MIT License](LICENSE). Online Boutique source files retain Google
 LLC's Apache License 2.0 notices. See
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Evidence status
+
+> Tip-cite (bank format): T-Py-T/aks-ado-microservices-cicd #PR TBD `207755f9`
+
+The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
+`READY` claim and reports no invented score; no readiness conclusion is asserted.
+The Steward resolves the short tip against `main` when a full SHA is needed.
