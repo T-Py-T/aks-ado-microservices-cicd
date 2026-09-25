@@ -1,10 +1,11 @@
 # Security policy
 
-> Tip-cite: main `a4a50522` + PR #71. Steward resolves; never READY.
+> Tip-cite: base main `672411fb` + PR #77. Steward resolves after merge; this pointer is not approval and never `READY`.
 
 This policy makes no `READY` claim and does not provide a score or security
-certification. For unresolved evidence gaps and held decisions, see the [open
-problems inventory](docs/OPEN_PROBLEMS.md).
+certification. The tip-cite above is only a trace pointer; it does not validate
+controls, unlock authentication, or establish live evidence. For unresolved
+evidence gaps and held decisions, see the [open problems inventory](docs/OPEN_PROBLEMS.md).
 
 ## Supported code
 
