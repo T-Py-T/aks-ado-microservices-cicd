@@ -7,5 +7,8 @@ assignees: ""
 ---
 
 <!-- Keep this issue docs-only; do not invent scores. -->
+<!-- Replace the placeholders with the post-merge main tip and this PR number. -->
 
-Tip-cite: `<8-char-main-tip> PR#<number> — <short description>`; blocked or untested status is never `READY`.
+Tip-cite: main `<8+ hex merge tip>` + PR #`<number>` — `<short description>`.
+
+Status: `BLOCKED` or `UNTESTED`; a tip-cite is not approval and never means `READY`.
