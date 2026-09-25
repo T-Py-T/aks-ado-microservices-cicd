@@ -1,10 +1,14 @@
 # Contributing
 
-> Tip-cite: main `ef190be6` + PR #69. Steward resolves; never READY.
+> Tip-cite: main `d9118c0` + PR #74. Steward resolves; this pointer is not approval and never `READY`.
 
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
 documentation around the upstream Online Boutique application.
+
+This guide is contribution guidance, not a readiness declaration. No change,
+check, or merged pull request described here should be treated as `READY`; the
+Steward resolves tip-cites against `main`.
 
 ## Evidence boundaries
 
