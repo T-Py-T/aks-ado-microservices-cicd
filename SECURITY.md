@@ -1,6 +1,6 @@
 # Security policy
 
-> Tip-cite: base main `672411fb` + PR #77. Steward resolves after merge; this pointer is not approval and never `READY`.
+> Tip-cite: base main `817b7247` + PR #78. Steward resolves after merge; this pointer is not approval and never `READY`.
 
 This policy makes no `READY` claim and does not provide a score or security
 certification. The tip-cite above is only a trace pointer; it does not validate
