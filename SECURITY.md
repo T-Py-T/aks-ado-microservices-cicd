@@ -1,5 +1,11 @@
 # Security policy
 
+> Tip-cite: main `18425809` + PR #71. Steward resolves; never READY.
+
+This policy makes no `READY` claim and does not provide a score or security
+certification. For unresolved evidence gaps and held decisions, see the [open
+problems inventory](docs/OPEN_PROBLEMS.md).
+
 ## Supported code
 
 The current `main` branch is the only supported version. This repository is an AKS and Azure DevOps microservices CI/CD lab; it does not operate a hosted service.
