@@ -79,6 +79,7 @@ repository-specific work.
 ## Keep exploring
 
 - [Notice](NOTICE.md) — attribution and provenance pointers; not a scorecard or `READY` gate.
+- [Funding](.github/FUNDING.yml) — sponsorship pointer; not a scorecard or `READY` gate.
 - [CODEOWNERS](.github/CODEOWNERS) — review routing and provenance pointers; not a scorecard or `READY` gate.
 - [Maintainers](MAINTAINERS.md) — factual owner and stewardship pointers; not a scorecard or `READY` gate.
 - [Roadmap](ROADMAP.md) — planned evidence-backed work; not a scorecard or `READY` gate.
