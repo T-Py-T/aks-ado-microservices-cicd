@@ -83,7 +83,7 @@ repository-specific work.
 - [Funding](.github/FUNDING.yml) — sponsorship pointer; not a scorecard or `READY` gate.
 - [CODEOWNERS](.github/CODEOWNERS) — review routing and provenance pointers; not a scorecard or `READY` gate.
 - [Maintainers](MAINTAINERS.md) — factual owner and stewardship pointers; not a scorecard or `READY` gate.
-- [Roadmap](ROADMAP.md) — planned evidence-backed work; not a scorecard or `READY` gate.
+- [Roadmap](ROADMAP.md) — planned evidence-backed work cross-linked from [Evidence status](#evidence-status); not a scorecard or `READY` gate.
 - [Open problems and held decisions](docs/OPEN_PROBLEMS.md) — active status
   inventory, not a scorecard or `READY` gate.
 
@@ -222,6 +222,12 @@ LLC's Apache License 2.0 notices. See
 > - Ship 37 / PR #67: T-Py-T/aks-ado-microservices-cicd `d1812187`
 > - Ship 49 / PR #68: T-Py-T/aks-ado-microservices-cicd `880adbd4`
 > - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
+> - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
+> - Ship 227: base main `864c3389` + this PR pending Steward — README/roadmap cross-link
+
+Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
+[#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next
+steps after Ship 219. A tip-cite is a trace pointer, not approval and never `READY`.
 
 The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
 `READY` claim and reports no invented score; no readiness conclusion is asserted.
