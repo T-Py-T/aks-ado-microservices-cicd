@@ -1,6 +1,6 @@
 # Roadmap
 
-> Tip-cite: base main `31b52ffe` + PR #83. Steward resolves after merge; this pointer is not approval and never `READY`.
+> Tip-cite: base main `864c3389` + Ship 227. Steward resolves after merge; this pointer is not approval and never `READY`.
 
 **Status:** planning document. This page lists intended, evidence-backed portfolio hygiene
 work. It is not a scorecard, acceptance record, release declaration, or `READY` claim.
@@ -16,12 +16,16 @@ receipts.
 
 | Field | Value |
 | --- | --- |
-| Base `main` tip | `31b52ffe` |
-| Merge PR | [#83](https://github.com/T-Py-T/aks-ado-microservices-cicd/pull/83) — Ship 171 CHANGELOG tip-cite |
+| Base `main` tip | `864c3389` |
+| Merge PR | Ship 227 — README/roadmap tip-cite cross-link (pending) |
+| Wayfinder | [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) — next steps after Ship 219 |
 | Steward | Resolves the 8-character tip against `main`; no `READY` claim |
 
-Ship 171 landed [`CHANGELOG.md`](CHANGELOG.md) at this tip. Use that file for landed
-docs-ship history; use this roadmap for planned work that has not yet shipped.
+Ship 219 landed [`docs/README.md`](docs/README.md) at tip `864c3389`. Use
+[`CHANGELOG.md`](CHANGELOG.md) for landed docs-ship history; use this roadmap for
+planned work that has not yet shipped. The root README
+[Evidence status](README.md#evidence-status) section carries the ship-specific
+tip-cite bank; this page cross-links that bank without duplicating it.
 
 ## Planned work
 
@@ -34,7 +38,7 @@ AKS credentials outside this repository.
 
 | Item | Status | Notes |
 | --- | --- | --- |
-| Reconcile README tip-cite bank with current doc headers | **GAP** | README footer still lists older ship pointers; align with post–Ship 171 doc tip-cites without inventing live-run evidence. |
+| Reconcile README tip-cite bank with current doc headers | **GAP** | Ship 227 adds README↔roadmap cross-links and recent ship pointers; remaining doc headers may still need alignment without inventing live-run evidence. |
 | Record future docs-only ships in `CHANGELOG.md` | **UNTESTED** | Maintain the Ship 171 pattern: factual entries, tip-cite per merge, no readiness language. |
 | Refresh `docs/OPEN_PROBLEMS.md` when held boundaries change | **GAP** | Inventory should track new gaps; closing a roadmap item here is not the same as closing an open problem. |
 
