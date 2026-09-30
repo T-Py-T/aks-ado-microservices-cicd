@@ -11,6 +11,11 @@ The repository adds an Azure delivery path around the upstream application:
 source scanning, per-service container builds, image scanning, manifest version
 updates, and a Kubernetes definition for an operator-controlled AKS deployment.
 
+**Stack:** Azure DevOps · Trivy · ACR/Docker Hub · AKS/`kubectl` · eleven-service Online Boutique.
+**Discoverability:** hireability summary, suggested GitHub topics, and license pointers live in
+[docs/HIREABILITY.md](docs/HIREABILITY.md). Cross-links: [SECURITY](SECURITY.md),
+[CONTRIBUTING](CONTRIBUTING.md), [LICENSE](LICENSE).
+
 ![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
 ## Architecture and evidence path
@@ -78,7 +83,10 @@ repository-specific work.
 
 ## Keep exploring
 
+- [Hireability and discoverability](docs/HIREABILITY.md) — staffing-oriented evidence map and topics; not a scorecard or `READY` gate.
 - [Documentation index](docs/README.md) — purpose of `/docs` and links to repository documents; not a scorecard or `READY` gate.
+- [Security](SECURITY.md) — vulnerability reporting; not a scorecard or `READY` gate.
+- [Contributing](CONTRIBUTING.md) — contribution and tip-cite rules; not a scorecard or `READY` gate.
 - [Notice](NOTICE.md) — attribution and provenance pointers; not a scorecard or `READY` gate.
 - [Funding](.github/FUNDING.yml) — sponsorship pointer; not a scorecard or `READY` gate.
 - [CODEOWNERS](.github/CODEOWNERS) — review routing and provenance pointers; not a scorecard or `READY` gate.
@@ -178,24 +186,9 @@ communicate over gRPC using the DNS names declared in the manifest.
 
 ## Hireability / what this proves
 
-This repository is a compact, reviewable example of delivery ownership for a
-polyglot microservices application. It demonstrates that I can:
-
-- map source changes to repeatable build, image-scan, publish, and
-  manifest-update stages in Azure DevOps;
-- describe Kubernetes delivery details—service-to-service addresses, probes,
-  resource requests, image versions, and rollout checks—without hiding the
-  operational steps; and
-- keep delivery evidence bounded: credentials stay in service connections or
-  variable groups, promotion is reviewed before apply, and the documented
-  checks are reproducible from the repository.
-
-These are implementation and documentation signals, not a claim of production
-uptime, measured delivery improvement, security certification, or a readiness
-score. See [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) for the active
-evidence gaps and held decisions that bound this narrative; it is not a
-scorecard or `READY` gate. The repository does not assert `READY`; the Steward
-resolves cited tips against `main`.
+Staffing-oriented evidence map: [docs/HIREABILITY.md](docs/HIREABILITY.md)
+(inspectable delivery choices only; not `READY`). See also
+[`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) for held evidence boundaries.
 
 ## Screenshots
 
@@ -223,7 +216,8 @@ LLC's Apache License 2.0 notices. See
 > - Ship 49 / PR #68: T-Py-T/aks-ado-microservices-cicd `880adbd4`
 > - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
 > - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
-> - Ship 227: base main `864c3389` + this PR pending Steward — README/roadmap cross-link
+> - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
+> - Ship 239: base main `eccde3f7` + this PR pending Steward — README hireability lean
 
 Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
 [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next
