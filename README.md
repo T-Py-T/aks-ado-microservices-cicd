@@ -84,6 +84,8 @@ repository-specific work.
 ## Keep exploring
 
 - [Documentation index](docs/README.md) — purpose of `/docs` and links to repository documents; not a scorecard or `READY` gate.
+- [Security policy](SECURITY.md) — vulnerability reporting boundary; not a scorecard or `READY` gate.
+- [Contributing](CONTRIBUTING.md) — contribution guidance; not a scorecard or `READY` gate.
 - [Notice](NOTICE.md) — attribution and provenance pointers; not a scorecard or `READY` gate.
 - [Funding](.github/FUNDING.yml) — sponsorship pointer; not a scorecard or `READY` gate.
 - [CODEOWNERS](.github/CODEOWNERS) — review routing and provenance pointers; not a scorecard or `READY` gate.
@@ -221,7 +223,9 @@ assert `READY`; the Steward resolves cited tips against `main`.
 Repository-specific pipeline, deployment, and documentation work is available
 under the [MIT License](LICENSE). Online Boutique source files retain Google
 LLC's Apache License 2.0 notices. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). For vulnerability reporting
+see [SECURITY.md](SECURITY.md); for contribution expectations see
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Evidence status
 
@@ -233,6 +237,7 @@ LLC's Apache License 2.0 notices. See
 > - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
 > - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
 > - Ship 239 / PR #94: base main `eccde3f7` + pending Steward — README hireability lean / portfolio discoverability
+> - Ship 243: base main `182e9315` / PR#94 + this PR pending Steward — README/SECURITY/CONTRIBUTING cross-link
 
 Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
 [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next

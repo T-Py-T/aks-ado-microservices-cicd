@@ -1,6 +1,6 @@
 # Contributing
 
-> Tip-cite: main `d9118c0` + PR #74. Steward resolves; this pointer is not approval and never `READY`.
+> Tip-cite: base main `182e9315` / PR#94 + this PR pending Steward resolve. This pointer is not approval and never `READY`.
 
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
@@ -17,6 +17,8 @@ Steward resolves tip-cites against `main`.
 - [README: Hireability / what this proves](README.md#hireability--what-this-proves)
   describes the repository evidence boundaries and non-claims.
 - [`docs/HIREABILITY.md`](docs/HIREABILITY.md) — fallback index with thin cross-links only.
+- [Security policy](SECURITY.md) — report vulnerabilities privately; do not open public issues for unpatched security flaws.
+- [License](LICENSE) — MIT terms for repository-specific work; not a readiness declaration.
 
 ## Before opening a pull request
 

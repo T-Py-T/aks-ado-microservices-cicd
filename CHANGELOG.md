@@ -1,9 +1,12 @@
 # Changelog
 
-> Tip-cite: base `main` `eccde3f7` + PR #94 (Ship 239). Steward resolves after merge; this pointer is not approval and never `READY`.
+> Tip-cite: base `main` `182e9315` / PR#94 + Ship 243 pending Steward resolve. This pointer is not approval and never `READY`.
 
 ## Unreleased
 
+- Ship 243 (starve-fill): README↔SECURITY↔CONTRIBUTING↔LICENSE discoverability
+  cross-links and tip-cite hygiene on `SECURITY.md` and `CONTRIBUTING.md`.
+  Docs-only; no `READY` claim.
 - Ship 239 (docs-only): lean README hireability and portfolio discoverability
   (pitch, suggested topics, license cross-links); add [`docs/HIREABILITY.md`](docs/HIREABILITY.md)
   fallback index with thin cross-links. Extends README evidence-status tip-cite bank.
