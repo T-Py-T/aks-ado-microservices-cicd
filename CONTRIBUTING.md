@@ -16,6 +16,7 @@ Steward resolves tip-cites against `main`.
   gaps and held decisions; it is not a scorecard or `READY` gate.
 - [README: Hireability / what this proves](README.md#hireability--what-this-proves)
   describes the repository evidence boundaries and non-claims.
+- [`docs/HIREABILITY.md`](docs/HIREABILITY.md) — fallback index with thin cross-links only.
 
 ## Before opening a pull request
 
