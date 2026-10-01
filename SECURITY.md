@@ -1,6 +1,6 @@
 # Security policy
 
-> Tip-cite: base main `817b7247` + PR #78. Steward resolves after merge; this pointer is not approval and never `READY`.
+> Tip-cite: base main `182e9315` / PR#94 + this PR pending Steward resolve. This pointer is not approval and never `READY`.
 
 This policy makes no `READY` claim and does not provide a score or security
 certification. The tip-cite above is only a trace pointer; it does not validate
@@ -33,3 +33,9 @@ Runtime secrets and cloud credentials belong outside the repository. Never commi
 The Azure Pipeline, Trivy scans, and offline manifest validation are local and lab operator tools. They help you build, scan, and apply this demo on infrastructure you control. They do not certify Azure DevOps, AKS, container registries, third-party base images, or generated artifacts as secure.
 
 Local validation gates and scan results do not certify a pipeline, cluster, provider, or generated change as secure.
+
+## Related documents
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidance; use [Report a vulnerability](#report-a-vulnerability) for security issues instead of public issues.
+- [LICENSE](LICENSE) — MIT terms for repository-specific work; upstream notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- [Documentation index](docs/README.md) and [README: Keep exploring](README.md#keep-exploring) — navigation to other repository documents; not a `READY` gate.
