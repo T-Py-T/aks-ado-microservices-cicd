@@ -11,6 +11,11 @@ The repository adds an Azure delivery path around the upstream application:
 source scanning, per-service container builds, image scanning, manifest version
 updates, and a Kubernetes definition for an operator-controlled AKS deployment.
 
+**Platform portfolio:** Azure DevOps + AKS delivery sample in the
+[T-Py-T](https://github.com/T-Py-T) portfolio (sibling repos document other
+cloud paths; none assert shared live-cluster proof). Reviewer narrative:
+[Hireability / what this proves](#hireability--what-this-proves).
+
 ![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
 ## Architecture and evidence path
@@ -86,6 +91,8 @@ repository-specific work.
 - [Roadmap](ROADMAP.md) — planned evidence-backed work cross-linked from [Evidence status](#evidence-status); not a scorecard or `READY` gate.
 - [Open problems and held decisions](docs/OPEN_PROBLEMS.md) — active status
   inventory, not a scorecard or `READY` gate.
+- [Hireability fallback index](docs/HIREABILITY.md) — thin cross-links to the
+  canonical README section; not a scorecard or `READY` gate.
 
 ## Prerequisites
 
@@ -178,24 +185,25 @@ communicate over gRPC using the DNS names declared in the manifest.
 
 ## Hireability / what this proves
 
-This repository is a compact, reviewable example of delivery ownership for a
-polyglot microservices application. It demonstrates that I can:
+Compact, reviewable delivery-ownership sample for a polyglot microservices app.
+Inspect [`azure-pipelines.yml`](azure-pipelines.yml) for scan/build/publish/manifest
+stages, [`deployment-service.yaml`](deployment-service.yaml) for probes, resources,
+and gRPC wiring, and [local validation](#local-validation) for offline checks.
+Evidence gaps and held decisions live in [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md)
+(not a scorecard or `READY` gate). Thin cross-links: [`docs/HIREABILITY.md`](docs/HIREABILITY.md),
+[Contributing](CONTRIBUTING.md), [documentation index](docs/README.md).
 
-- map source changes to repeatable build, image-scan, publish, and
-  manifest-update stages in Azure DevOps;
-- describe Kubernetes delivery details—service-to-service addresses, probes,
-  resource requests, image versions, and rollout checks—without hiding the
-  operational steps; and
-- keep delivery evidence bounded: credentials stay in service connections or
-  variable groups, promotion is reviewed before apply, and the documented
-  checks are reproducible from the repository.
+**Suggested GitHub topics (search hints only):** `azure-devops`, `aks`, `kubernetes`,
+`microservices`, `cicd`, `container-security`, `devops-portfolio` — labels for
+discoverability; they do not certify live deployment.
 
-These are implementation and documentation signals, not a claim of production
-uptime, measured delivery improvement, security certification, or a readiness
-score. See [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) for the active
-evidence gaps and held decisions that bound this narrative; it is not a
-scorecard or `READY` gate. The repository does not assert `READY`; the Steward
-resolves cited tips against `main`.
+**License (portfolio hygiene):** repository pipeline, deployment, and documentation
+work under the [MIT License](LICENSE); upstream Online Boutique sources under Apache
+2.0 per [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) (see also [License](#license)).
+
+Implementation and documentation signals only—no production uptime, measured delivery
+improvement, security certification, or readiness score. The repository does not
+assert `READY`; the Steward resolves cited tips against `main`.
 
 ## Screenshots
 
@@ -223,7 +231,8 @@ LLC's Apache License 2.0 notices. See
 > - Ship 49 / PR #68: T-Py-T/aks-ado-microservices-cicd `880adbd4`
 > - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
 > - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
-> - Ship 227: base main `864c3389` + this PR pending Steward — README/roadmap cross-link
+> - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
+> - Ship 239 / PR #94: base main `eccde3f7` + pending Steward — README hireability lean / portfolio discoverability
 
 Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
 [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next
