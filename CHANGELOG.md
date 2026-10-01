@@ -1,6 +1,6 @@
 # Changelog
 
-> Tip-cite: base `main` `eccde3f7` + Ship 239. Steward resolves after merge; this pointer is not approval and never `READY`.
+> Tip-cite: base `main` `eccde3f7` + PR #94 (Ship 239). Steward resolves after merge; this pointer is not approval and never `READY`.
 
 ## Unreleased
 

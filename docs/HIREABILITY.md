@@ -1,6 +1,6 @@
 # Hireability (fallback index)
 
-> Tip-cite: base main `eccde3f7` + Ship 239 pending Steward; provenance only; never `READY`.
+> Tip-cite: base main `eccde3f7` + PR #94 (Ship 239) pending Steward; provenance only; never `READY`.
 
 **Status:** fallback pointer. The canonical hireability narrative lives in the root
 README; this page only routes reviewers who land here first.

@@ -232,7 +232,7 @@ LLC's Apache License 2.0 notices. See
 > - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
 > - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
 > - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
-> - Ship 239: base main `eccde3f7` + this PR pending Steward — README hireability lean / portfolio discoverability
+> - Ship 239 / PR #94: base main `eccde3f7` + pending Steward — README hireability lean / portfolio discoverability
 
 Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
 [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next
