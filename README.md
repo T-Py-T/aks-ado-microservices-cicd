@@ -14,7 +14,7 @@ updates, and a Kubernetes definition for an operator-controlled AKS deployment.
 **Platform portfolio:** Azure DevOps + AKS delivery sample in the
 [T-Py-T](https://github.com/T-Py-T) portfolio (sibling repos document other
 cloud paths; none assert shared live-cluster proof). Reviewer narrative:
-[Hireability / what this proves](#hireability--what-this-proves).
+[What this proves](#what-this-proves).
 
 ![Azure delivery architecture](docs/img/CICD-Architechture.png)
 
@@ -93,8 +93,6 @@ repository-specific work.
 - [Roadmap](ROADMAP.md) — planned evidence-backed work cross-linked from [Evidence status](#evidence-status); not a scorecard or `READY` gate.
 - [Open problems and held decisions](docs/OPEN_PROBLEMS.md) — active status
   inventory, not a scorecard or `READY` gate.
-- [Hireability fallback index](docs/HIREABILITY.md) — thin cross-links to the
-  canonical README section; not a scorecard or `READY` gate.
 
 ## Prerequisites
 
@@ -185,15 +183,14 @@ kubectl get pods,svc
 The frontend is exposed through a Kubernetes service; the remaining services
 communicate over gRPC using the DNS names declared in the manifest.
 
-## Hireability / what this proves
+## What this proves
 
 Compact, reviewable delivery-ownership sample for a polyglot microservices app.
 Inspect [`azure-pipelines.yml`](azure-pipelines.yml) for scan/build/publish/manifest
 stages, [`deployment-service.yaml`](deployment-service.yaml) for probes, resources,
 and gRPC wiring, and [local validation](#local-validation) for offline checks.
 Evidence gaps and held decisions live in [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md)
-(not a scorecard or `READY` gate). Thin cross-links: [`docs/HIREABILITY.md`](docs/HIREABILITY.md),
-[Contributing](CONTRIBUTING.md), [documentation index](docs/README.md).
+(not a scorecard or `READY` gate). Thin cross-links: [Contributing](CONTRIBUTING.md), [documentation index](docs/README.md).
 
 **Suggested GitHub topics (search hints only):** `azure-devops`, `aks`, `kubernetes`,
 `microservices`, `cicd`, `container-security`, `devops-portfolio` — labels for

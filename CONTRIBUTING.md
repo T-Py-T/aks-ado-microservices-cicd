@@ -14,9 +14,8 @@ Steward resolves tip-cites against `main`.
 
 - [Open problems and held decisions](docs/OPEN_PROBLEMS.md) records active evidence
   gaps and held decisions; it is not a scorecard or `READY` gate.
-- [README: Hireability / what this proves](README.md#hireability--what-this-proves)
+- [README: What this proves](README.md#what-this-proves)
   describes the repository evidence boundaries and non-claims.
-- [`docs/HIREABILITY.md`](docs/HIREABILITY.md) — fallback index with thin cross-links only.
 - [Security policy](SECURITY.md) — report vulnerabilities privately; do not open public issues for unpatched security flaws.
 - [License](LICENSE) — MIT terms for repository-specific work; not a readiness declaration.
 

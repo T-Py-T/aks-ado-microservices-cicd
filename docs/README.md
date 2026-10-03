@@ -30,9 +30,6 @@ they exist in this repository:
 
 ## In this directory
 
-- [`HIREABILITY.md`](HIREABILITY.md) — fallback index to root
-  [Hireability / what this proves](../README.md#hireability--what-this-proves); thin
-  cross-links only; not a `READY` gate.
 - [`OPEN_PROBLEMS.md`](OPEN_PROBLEMS.md) — active evidence gaps and held decisions;
   not a scorecard or `READY` gate.
 
