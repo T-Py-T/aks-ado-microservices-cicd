@@ -233,7 +233,7 @@ see [SECURITY.md](SECURITY.md); for contribution expectations see
 > - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
 > - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
 > - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
-> - Ship 239 / PR #94: base main `eccde3f7` + pending Steward — README hireability lean / portfolio discoverability
+> - Ship 239 / PR #94: base main `eccde3f7` + pending Steward
 > - Ship 243: base main `182e9315` / PR#94 + this PR pending Steward — README/SECURITY/CONTRIBUTING cross-link
 
 Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
