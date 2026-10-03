@@ -7,7 +7,7 @@
 - Ship 243 (starve-fill): README↔SECURITY↔CONTRIBUTING↔LICENSE discoverability
   cross-links and tip-cite hygiene on `SECURITY.md` and `CONTRIBUTING.md`.
   Docs-only; no `READY` claim.
-- Ship 239 (docs-only): lean README hireability and portfolio discoverability
+- Ship 239 (docs-only): lean README
   (pitch, suggested topics, license cross-links). Extends README evidence-status tip-cite bank.
   No `READY` claim.
 - Ship 227 (starve-fill): README↔roadmap tip-cite cross-link per wayfinder
