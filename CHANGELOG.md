@@ -8,8 +8,7 @@
   cross-links and tip-cite hygiene on `SECURITY.md` and `CONTRIBUTING.md`.
   Docs-only; no `READY` claim.
 - Ship 239 (docs-only): lean README hireability and portfolio discoverability
-  (pitch, suggested topics, license cross-links); add [`docs/HIREABILITY.md`](docs/HIREABILITY.md)
-  fallback index with thin cross-links. Extends README evidence-status tip-cite bank.
+  (pitch, suggested topics, license cross-links). Extends README evidence-status tip-cite bank.
   No `READY` claim.
 - Ship 227 (starve-fill): README↔roadmap tip-cite cross-link per wayfinder
   [#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90). Remaps
