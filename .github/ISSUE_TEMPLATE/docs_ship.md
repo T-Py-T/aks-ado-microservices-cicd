@@ -1,14 +1,21 @@
 ---
-name: Docs-only ship
-about: Track a docs-only change with an auditable tip citation
+name: Documentation change
+about: Propose or track a docs-only change
 title: "docs: "
 labels: ""
 assignees: ""
 ---
 
-<!-- Keep this issue docs-only; do not invent scores. -->
-<!-- Replace the placeholders with the post-merge main tip and this PR number. -->
+## What should change
 
-Tip-cite: main `<8+ hex merge tip>` + PR #`<number>` — `<short description>`.
+<!-- Which document, and what is wrong or missing? -->
 
-Status: `BLOCKED` or `UNTESTED`; a tip-cite is not approval and never means `READY`.
+## Why
+
+<!-- Who is affected, and how? -->
+
+## Validation
+
+<!-- Links to check, commands to rerun, or "docs only". Don't invent results. -->
+
+- [ ] No secrets, tokens, kubeconfigs or personal data in this issue

@@ -1,21 +1,24 @@
 # Governance
 
-> Tip-cite: base `main` `6b17dd48` + Ship 139. Steward resolves after merge; this pointer is not approval and never `READY`.
+This repository is an Azure DevOps and AKS delivery example with a single
+owner, [@T-Py-T](https://github.com/T-Py-T) (see [MAINTAINERS.md](MAINTAINERS.md)).
 
-This repository is an Azure DevOps and AKS delivery lab. Repository files,
-checks, manifests, and pull requests are evidence of intended implementation;
-they are not live-environment approval, deployment evidence, or a `READY`
-declaration.
+## How changes are made
 
-## Tip-cite protocol
+1. Changes arrive as pull requests against `main`, one concern per pull
+   request.
+2. The PR Checks workflow must pass before merge.
+3. The owner reviews and decides whether to merge.
+4. Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md). Planned work
+   lives in [ROADMAP.md](ROADMAP.md), and known gaps in
+   [docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md).
 
-1. Start work from the current `main` tip and record at least eight hexadecimal
-   characters of that base commit.
-2. Keep the base tip and pull request number in the change's tip-cite.
-3. After merge, the Steward resolves the cited tip against `main`. A tip-cite
-   is a trace pointer, not approval, certification, or `READY` evidence.
+## What the repository can and can't show
 
-Azure DevOps runs, registry provenance, AKS context, rollout health, and
+Repository files, checks, manifests and pull requests show the intended
+implementation. They aren't approval for, or proof of, a live deployment.
+Azure DevOps runs, registry provenance, AKS context, rollout health and
 operator authorization must be verified in the environment being changed.
+
 Keep credentials and environment-specific values in approved Azure DevOps
 variable groups or service connections, not in this repository.
