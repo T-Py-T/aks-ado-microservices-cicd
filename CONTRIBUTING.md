@@ -1,23 +1,18 @@
 # Contributing
 
-> Tip-cite: base main `182e9315` / PR#94 + this PR pending Steward resolve. This pointer is not approval and never `READY`.
-
 Thanks for helping improve this Azure DevOps and AKS delivery example. Keep
 changes focused on the repository-specific pipeline, deployment, tests, and
 documentation around the upstream Online Boutique application.
 
-This guide is contribution guidance, not a readiness declaration. No change,
-check, or merged pull request described here should be treated as `READY`; the
-Steward resolves tip-cites against `main`.
+## Useful links
 
-## Evidence boundaries
-
-- [Open problems and held decisions](docs/OPEN_PROBLEMS.md) records active evidence
-  gaps and held decisions; it is not a scorecard or `READY` gate.
-- [README: What this proves](README.md#what-this-proves)
-  describes the repository evidence boundaries and non-claims.
-- [Security policy](SECURITY.md) — report vulnerabilities privately; do not open public issues for unpatched security flaws.
-- [License](LICENSE) — MIT terms for repository-specific work; not a readiness declaration.
+- [Open problems and held decisions](docs/OPEN_PROBLEMS.md): known gaps that
+  are good places to help.
+- [README: Worked path](README.md#worked-path-validate-the-whole-delivery-offline):
+  the offline checks a change should keep passing.
+- [Security policy](SECURITY.md): report vulnerabilities privately; don't open
+  public issues for unpatched security flaws.
+- [License](LICENSE): MIT terms for repository-specific work.
 
 ## Before opening a pull request
 
