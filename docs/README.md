@@ -1,9 +1,6 @@
 # Documentation index
 
-> Tip-cite bank: base main `182e9315` / PR#94 + Ship 243 pending Steward resolve; provenance only; never `READY`.
-
-**Status:** index page. This directory collects supporting documentation for the
-repository. It is not a scorecard, readiness declaration, or invented score.
+This directory collects supporting documentation for the repository.
 
 ## Purpose of `/docs`
 
@@ -20,24 +17,17 @@ they exist in this repository:
 
 | Document | Path | Role |
 | --- | --- | --- |
-| Contributing | [`CONTRIBUTING.md`](../CONTRIBUTING.md) | Contribution guidance; not a `READY` gate. |
-| Security | [`SECURITY.md`](../SECURITY.md) | Vulnerability reporting boundary; not a readiness declaration. |
-| Maintainers | [`MAINTAINERS.md`](../MAINTAINERS.md) | Factual owner record; not a scorecard. |
-| Notice | [`NOTICE.md`](../NOTICE.md) | Attribution and provenance; not a `READY` claim. |
-| CODEOWNERS | [`.github/CODEOWNERS`](../.github/CODEOWNERS) | Review routing; not a scorecard. |
-| Funding | [`.github/FUNDING.yml`](../.github/FUNDING.yml) | Sponsorship pointer; not a `READY` gate. |
-| Roadmap | [`ROADMAP.md`](../ROADMAP.md) | Planned evidence-backed work cross-linked from root [Evidence status](../README.md#evidence-status); not a release declaration. |
+| Contributing | [`CONTRIBUTING.md`](../CONTRIBUTING.md) | How to propose and validate changes |
+| Security | [`SECURITY.md`](../SECURITY.md) | How to report a vulnerability privately |
+| Maintainers | [`MAINTAINERS.md`](../MAINTAINERS.md) | Repository owner |
+| Notice | [`NOTICE.md`](../NOTICE.md) | Attribution and provenance |
+| CODEOWNERS | [`.github/CODEOWNERS`](../.github/CODEOWNERS) | Review routing |
+| Funding | [`.github/FUNDING.yml`](../.github/FUNDING.yml) | Sponsorship pointer |
+| Roadmap | [`ROADMAP.md`](../ROADMAP.md) | Planned work, also linked from the root README's [Roadmap and open problems](../README.md#roadmap-and-open-problems) section |
 
 ## In this directory
 
-- [`OPEN_PROBLEMS.md`](OPEN_PROBLEMS.md) — active evidence gaps and held decisions;
-  not a scorecard or `READY` gate.
+- [`OPEN_PROBLEMS.md`](OPEN_PROBLEMS.md): known gaps and held decisions.
 
-## Explicit non-claims
-
-- No index entry is a `READY` declaration.
-- No score, metric, production outcome, or security certification is asserted.
-- No live Azure DevOps run, registry scan, or AKS rollout is inferred from this
-  page.
-- The tip-cite above is only a trace pointer; the Steward resolves it against
-  `main` after merge. It is not approval and never implies `READY`.
+Nothing on this page implies a live Azure DevOps run, registry scan, or AKS
+rollout.

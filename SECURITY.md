@@ -1,11 +1,8 @@
 # Security policy
 
-> Tip-cite: base main `182e9315` / PR#94 + this PR pending Steward resolve. This pointer is not approval and never `READY`.
-
-This policy makes no `READY` claim and does not provide a score or security
-certification. The tip-cite above is only a trace pointer; it does not validate
-controls, unlock authentication, or establish live evidence. For unresolved
-evidence gaps and held decisions, see the [open problems inventory](docs/OPEN_PROBLEMS.md).
+This policy explains how to report a vulnerability. It is not a security
+certification. For known gaps and held decisions, see the
+[open problems inventory](docs/OPEN_PROBLEMS.md).
 
 ## Supported code
 
@@ -38,4 +35,4 @@ Local validation gates and scan results do not certify a pipeline, cluster, prov
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — contribution guidance; use [Report a vulnerability](#report-a-vulnerability) for security issues instead of public issues.
 - [LICENSE](LICENSE) — MIT terms for repository-specific work; upstream notices in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-- [Documentation index](docs/README.md) and [README: Keep exploring](README.md#keep-exploring) — navigation to other repository documents; not a `READY` gate.
+- [Documentation index](docs/README.md) — navigation to other repository documents.
