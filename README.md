@@ -1,63 +1,159 @@
+<div align="center">
+
 # AKS Microservices Delivery with Azure DevOps
+
+**Scan it, build it, pin it, ship it: an eleven-service storefront on Azure Kubernetes Service.**
+
+An Azure DevOps pipeline and AKS manifest wrapped around Google Cloud's
+[Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo),
+a polyglot e-commerce app built from eleven gRPC services in Go, C#, Node.js,
+Python and Java.
 
 [![PR Checks](https://github.com/T-Py-T/aks-ado-microservices-cicd/actions/workflows/pr-checks.yml/badge.svg?branch=main)](https://github.com/T-Py-T/aks-ado-microservices-cicd/actions/workflows/pr-checks.yml)
 
+[Getting started](#getting-started) ·
+[Worked path](#worked-path-validate-the-whole-delivery-offline) ·
+[Pipeline](#how-the-pipeline-works) ·
+[Deploy to AKS](#deploy-to-your-own-aks-cluster) ·
+[Contributing](#contributing)
 
-An Azure DevOps delivery pipeline for
-[Google Cloud's Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo),
-a polyglot e-commerce application made of eleven gRPC services.
+![Online Boutique storefront: hot products grid with sunglasses, tank top, watch, loafers, hairdryer, candle holder and more](docs/img/online-boutique-frontend-1.png)
 
-The repository adds an Azure delivery path around the upstream application:
-source scanning, per-service container builds, image scanning, manifest version
-updates, and a Kubernetes definition for an operator-controlled AKS deployment.
+<sub>The storefront this pipeline delivers. Screenshot captured from an earlier deployment; nothing is hosted from this repository today.</sub>
 
-**Platform portfolio:** Azure DevOps + AKS delivery sample in the
-[T-Py-T](https://github.com/T-Py-T) portfolio (sibling repos document other
-cloud paths; none assert shared live-cluster proof). Reviewer narrative:
-[What this proves](#what-this-proves).
+</div>
 
-![Azure delivery architecture](docs/img/CICD-Architechture.png)
+## What you get
 
-## Architecture and evidence path
+- **One pipeline file for the whole store.**
+  [`azure-pipelines.yml`](azure-pipelines.yml) runs a Trivy filesystem scan,
+  builds and pushes all eleven service images, pulls each one back for a Trivy
+  image scan, then writes the build ID into the manifest.
+- **One manifest for the whole cluster.**
+  [`deployment-service.yaml`](deployment-service.yaml) declares 24 Kubernetes
+  resources (deployments, services and Redis) with probes, resource requests
+  and gRPC service addresses.
+- **Manual on purpose.** `trigger: none` and `pr: none` mean nothing builds or
+  publishes until someone starts the pipeline.
+- **Pinned inputs.** Every external Docker parent image is pinned by digest,
+  and the repository tests enforce it.
+- **Checks you can run on a laptop.** Repository policy, manifest schema,
+  Go/.NET unit tests and a Node service boot check all run without Azure.
 
-Use the architecture image as the map, then follow the repository paths that
-carry each delivery step:
+## Getting started
 
-1. [`azure-pipelines.yml`](azure-pipelines.yml) shows source scanning, the
-   eleven image builds, image scans, and manifest-version update.
-2. [`deployment-service.yaml`](deployment-service.yaml) shows the AKS-facing
-   workloads, probes, resources, ports, and service-to-service addresses.
-3. [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md) records evidence gaps and
-   held decisions; it keeps repository evidence separate from authorized Azure
-   DevOps, registry, and live-cluster evidence.
+### Prerequisites for local checks
 
-This path makes the implementation reviewable without treating diagrams,
-source files, or screenshots as proof of current live deployment state.
+- Python 3 and [`pre-commit`](https://pre-commit.com/)
+- Go (the kubeconform module asks for Go 1.26 or newer; with the default
+  `GOTOOLCHAIN=auto`, `go` downloads it)
+- Optional, for the service checks: .NET 10 SDK, Node.js and npm
+
+### Clone and check
+
+```bash
+git clone https://github.com/T-Py-T/aks-ado-microservices-cicd.git
+cd aks-ado-microservices-cicd
+
+pre-commit run --all-files
+go run github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0 -strict -summary deployment-service.yaml
+```
+
+Expected output:
+
+```text
+repository policy........................................................Passed
+Summary: 24 resources found in 1 file - Valid: 24, Invalid: 0, Errors: 0, Skipped: 0
+```
+
+## Worked path: validate the whole delivery offline
+
+This path follows what the pipeline checks without touching Azure.
+
+**1. Repository policy.** Workflows run only on pull requests, Actions and
+Docker parents are pinned, the Azure Pipeline has no automatic trigger, and
+Redis is version- and digest-pinned:
+
+```bash
+pre-commit run --all-files
+```
+
+**2. Manifest schema.** Validate every resource in the AKS manifest offline:
+
+```bash
+go run github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0 -strict -summary deployment-service.yaml
+```
+
+**3. Service tests.** Run the Go and .NET suites:
+
+```bash
+(cd src/productcatalogservice && go test ./...)
+(cd src/shippingservice && go test ./...)
+dotnet test src/cartservice/tests/cartservice.tests.csproj --configuration Release
+```
+
+**4. Boot a service.** Install the currency service and confirm its gRPC server
+starts:
+
+```bash
+(cd src/currencyservice && npm ci)
+node tests/node_service_smoke.js src/currencyservice server.js "CurrencyService gRPC server started" 17000
+```
+
+The smoke script starts the server, waits for the ready message, stops it, and
+exits 0 when the server came up.
+
+**The rest of the pull-request gate** (not run for this README). CI also runs
+these:
+
+```bash
+for service in checkoutservice frontend; do
+  (cd "src/$service" && go test ./...)
+done
+(cd src/currencyservice && npm audit --omit=dev)
+(cd src/paymentservice && npm ci && npm audit --omit=dev)
+node tests/node_service_smoke.js src/paymentservice index.js "PaymentService gRPC server started" 15000
+python -m pip install pip-audit
+pip-audit -r src/emailservice/requirements.txt
+pip-audit -r src/recommendationservice/requirements.txt
+pip-audit -r src/loadgenerator/requirements.txt
+(cd src/adservice && ./gradlew --no-daemon build)   # needs Java 25
+```
+
+Grype exceptions in [`.grype.yaml`](.grype.yaml) cover only advisories whose
+fixes need a prerelease runtime.
 
 ## How the pipeline works
 
 ```text
-source change
+manual run
     │
     ▼
-Trivy filesystem scan
+StaticAnalyze             Trivy filesystem scan (HIGH/CRITICAL fails the run)
     │
     ▼
-build and publish 11 service images
+BuildAndPushImages        11 × Docker@2 build and push
     │
     ▼
-pull and scan each image
+PullAndScanImages         pull each image back, Trivy image scan
     │
     ▼
-update deployment-service.yaml with the build version
+UpdateAndCommitDeploymentYAML
+                          write the build ID into deployment-service.yaml
     │
     ▼
-review and apply the manifest to an AKS environment
+review the manifest, then apply it to AKS (operator step)
 ```
 
-[`azure-pipelines.yml`](azure-pipelines.yml) contains the build and scan jobs.
-[`deployment-service.yaml`](deployment-service.yaml) defines the service
-deployments, ports, probes, resource requests, and service-to-service addresses.
+Each run commits its build ID to `deployment-service.yaml`, so a deployment
+names an explicit set of service versions. That write-back is the reason
+automatic triggers are off.
+
+![Azure delivery architecture: Azure Repos and Azure DevOps CI feeding Docker Hub, a release pipeline updating manifests, and dev and prod AKS clusters](docs/img/CICD-Architechture.png)
+
+The diagram shows the wider target design. Some parts of it, including
+Terraform, Argo CD, Front Door and Application Gateway, have no configuration
+in this repository. What is in the tree is the pipeline YAML and the manifest.
 
 ## Application services
 
@@ -77,100 +173,40 @@ deployments, ports, probes, resource requests, and service-to-service addresses.
 
 [![Online Boutique service architecture](docs/img/architecture-diagram.png)](docs/img/architecture-diagram.png)
 
-The application code comes from Online Boutique. The Azure Pipeline,
-environment promotion flow, image-version updates, and AKS integration are the
-repository-specific work.
+The application code comes from Online Boutique. This repository adds the
+Azure Pipeline, the image-version write-back and the AKS manifest.
 
-## Keep exploring
+## Run it in your own Azure DevOps project
 
-- [Documentation index](docs/README.md) — purpose of `/docs` and links to repository documents; not a scorecard or `READY` gate.
-- [Security policy](SECURITY.md) — vulnerability reporting boundary; not a scorecard or `READY` gate.
-- [Contributing](CONTRIBUTING.md) — contribution guidance; not a scorecard or `READY` gate.
-- [Notice](NOTICE.md) — attribution and provenance pointers; not a scorecard or `READY` gate.
-- [Funding](.github/FUNDING.yml) — sponsorship pointer; not a scorecard or `READY` gate.
-- [CODEOWNERS](.github/CODEOWNERS) — review routing and provenance pointers; not a scorecard or `READY` gate.
-- [Maintainers](MAINTAINERS.md) — factual owner and stewardship pointers; not a scorecard or `READY` gate.
-- [Roadmap](ROADMAP.md) — planned evidence-backed work cross-linked from [Evidence status](#evidence-status); not a scorecard or `READY` gate.
-- [Open problems and held decisions](docs/OPEN_PROBLEMS.md) — active status
-  inventory, not a scorecard or `READY` gate.
+None of these steps were run for this README. The repository contains no
+Azure credentials, registry, or cluster, and it does not claim that any
+pipeline or cluster is running now.
 
-## Prerequisites
+You need:
 
 - an Azure DevOps project and pipeline;
-- an Azure Container Registry or Docker Hub service connection;
-- a target AKS cluster;
-- `kubectl` access to the target cluster; and
-- Trivy available in the build agent, or permission for the pipeline to install it.
+- a container registry service connection (the pipeline is wired to one
+  named `Docker Hub`);
+- a variable group named `Docker` with `dockerUsername` and a secret
+  `dockerPassword`;
+- an AKS cluster and `kubectl` access to it; and
+- a build agent that can install Trivy (the pipeline downloads it and checks
+  its checksum).
 
-The pipeline expects an Azure DevOps variable group named `Docker` and a
-container registry service connection named `Docker Hub`. Update those names
-and the image repository values to match your environment.
-
-Keep registry passwords and Azure credentials in variable groups or service
-connections. Do not commit them to this repository.
-
-## Local validation
-
-Install pre-commit, then run the repository policy checks:
-
-```bash
-python -m pip install pre-commit
-pre-commit run --all-files
-```
-
-Service-specific tests live under `src/<service>/` and use each service's
-native toolchain. Run the Go and .NET suites with:
-
-```bash
-for service in checkoutservice frontend productcatalogservice shippingservice; do
-  (cd "src/$service" && go test ./...)
-done
-dotnet test src/cartservice/tests/cartservice.tests.csproj --configuration Release
-```
-
-Audit the resolved Node and Python dependency sets with:
-
-```bash
-(cd src/currencyservice && npm ci && npm audit --omit=dev)
-(cd src/paymentservice && npm ci && npm audit --omit=dev)
-node tests/node_service_smoke.js src/currencyservice server.js "CurrencyService gRPC server started" 17000
-node tests/node_service_smoke.js src/paymentservice index.js "PaymentService gRPC server started" 15000
-python -m pip install pip-audit
-pip-audit -r src/emailservice/requirements.txt
-pip-audit -r src/recommendationservice/requirements.txt
-pip-audit -r src/loadgenerator/requirements.txt
-```
-
-The pull-request gate runs the same language-level checks before a branch can
-merge. Container definitions pin every external parent image by digest. Grype
-exceptions in [`.grype.yaml`](.grype.yaml) apply only to advisories whose fixes
-require a prerelease runtime.
-
-Validate the Kubernetes resources offline with:
-
-```bash
-go run github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0 -strict -summary deployment-service.yaml
-```
-
-## Azure DevOps setup
+Then:
 
 1. Import or connect this repository to Azure Repos/Pipelines.
-2. Create the container registry service connection.
-3. Create the `Docker` variable group with `dockerUsername` and a secret
-   `dockerPassword`.
-4. Update the image repository names in `azure-pipelines.yml`.
-5. Start the pipeline manually and review the Trivy results before promoting
-   the generated image versions.
-6. Review the updated manifest, then apply it to the intended AKS environment.
+2. Create the registry service connection and the `Docker` variable group.
+3. Update the image repository names in `azure-pipelines.yml` if needed.
+4. Start the pipeline manually and review the Trivy results.
+5. Review the manifest change the pipeline commits.
 
-The manifest update job records the pipeline build ID in
-`deployment-service.yaml`, giving each deployment an explicit set of service
-versions. Automatic Azure Pipeline triggers are disabled because the pipeline
-publishes images and writes the selected build version back to the manifest.
+Keep registry passwords and Azure credentials in variable groups or service
+connections, never in the repository.
 
-## Deployment
+## Deploy to your own AKS cluster
 
-Apply the generated manifest to a configured cluster:
+Not run for this README; this needs your own cluster and credentials:
 
 ```bash
 az aks get-credentials --resource-group <resource-group> --name <cluster>
@@ -180,66 +216,63 @@ kubectl rollout status deployment/frontend
 kubectl get pods,svc
 ```
 
-The frontend is exposed through a Kubernetes service; the remaining services
-communicate over gRPC using the DNS names declared in the manifest.
+A Kubernetes service exposes the frontend. The other services talk to each
+other over gRPC using the DNS names in the manifest.
 
-## What this proves
+## Gallery
 
-Compact, reviewable delivery-ownership sample for a polyglot microservices app.
-Inspect [`azure-pipelines.yml`](azure-pipelines.yml) for scan/build/publish/manifest
-stages, [`deployment-service.yaml`](deployment-service.yaml) for probes, resources,
-and gRPC wiring, and [local validation](#local-validation) for offline checks.
-Evidence gaps and held decisions live in [`docs/OPEN_PROBLEMS.md`](docs/OPEN_PROBLEMS.md)
-(not a scorecard or `READY` gate). Thin cross-links: [Contributing](CONTRIBUTING.md), [documentation index](docs/README.md).
-
-**Suggested GitHub topics (search hints only):** `azure-devops`, `aks`, `kubernetes`,
-`microservices`, `cicd`, `container-security`, `devops-portfolio` — labels for
-discoverability; they do not certify live deployment.
-
-**License (portfolio hygiene):** repository pipeline, deployment, and documentation
-work under the [MIT License](LICENSE); upstream Online Boutique sources under Apache
-2.0 per [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) (see also [License](#license)).
-
-Implementation and documentation signals only—no production uptime, measured delivery
-improvement, security certification, or readiness score. The repository does not
-assert `READY`; the Steward resolves cited tips against `main`.
-
-## Screenshots
+These are historical captures from an earlier run of this delivery path (the
+CI run shown is dated January 2025). They show what the stages looked like
+then; they are not evidence that anything is running today.
 
 | Stage | Capture |
 | --- | --- |
-| Azure Pipeline | ![Azure Pipeline](docs/img/azure-pipelines.png) |
+| CI pipelines | ![Azure DevOps CI pipelines](docs/img/ado-ci-pipelines.png) |
+| Release pipeline (dev → test → prod) | ![Azure DevOps release pipeline](docs/img/ado-release-pipelines.png) |
+| Pipeline run | ![Azure Pipeline run](docs/img/azure-pipelines.png) |
 | Manifest update | ![Updated image versions](docs/img/yaml-updates.png) |
-| Development AKS | ![Development deployment](docs/img/dev-kube.png) |
-| Production AKS | ![Production deployment](docs/img/prod-kube.png) |
 | Trivy filesystem scan | ![Trivy filesystem scan](docs/img/trivy-file-scan.png) |
 | Trivy image scan | ![Trivy image scan](docs/img/trivy-iamge-scan.png) |
+| Development AKS | ![Development deployment](docs/img/dev-kube.png) |
+| Production AKS | ![Production deployment](docs/img/prod-kube.png) |
+| Storefront cart and checkout | ![Online Boutique storefront](docs/img/online-boutique-frontend-2.png) |
+
+The release pipeline was configured in the Azure DevOps UI and has no YAML in
+this repository. Terraform plan/apply captures are also in
+[`docs/img/`](docs/img), but no Terraform configuration is in the tree.
+
+## Roadmap and open problems
+
+Planned work is in [ROADMAP.md](ROADMAP.md). Known gaps and held decisions are
+in [docs/OPEN_PROBLEMS.md](docs/OPEN_PROBLEMS.md).
+
+## Contributing
+
+Good first areas: pipeline hardening, manifest improvements, more offline
+checks, or clearer setup docs.
+
+1. Fork the repository and branch from `main`.
+2. Keep one concern per pull request and say which pipeline stage, service or
+   Kubernetes resource it touches.
+3. Run `pre-commit run --all-files` and the kubeconform check, plus the tests
+   for any service you change.
+4. Never commit credentials, registry passwords or generated images.
+5. Open a pull request against `main`. The PR Checks workflow is the merge
+   gate.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details. Please report
+vulnerabilities privately as described in [SECURITY.md](SECURITY.md).
 
 ## License
 
-Repository-specific pipeline, deployment, and documentation work is available
-under the [MIT License](LICENSE). Online Boutique source files retain Google
+Repository-specific pipeline, deployment and documentation work is available
+under the [MIT License](LICENSE). The Online Boutique source files keep Google
 LLC's Apache License 2.0 notices. See
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). For vulnerability reporting
-see [SECURITY.md](SECURITY.md); for contribution expectations see
-[CONTRIBUTING.md](CONTRIBUTING.md).
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [NOTICE.md](NOTICE.md).
 
-## Evidence status
+## Acknowledgements
 
-> Tip-cite bank:
-> - Ship 31 / PR #66: T-Py-T/aks-ado-microservices-cicd `207755f9`
-> - Ship 37 / PR #67: T-Py-T/aks-ado-microservices-cicd `d1812187`
-> - Ship 49 / PR #68: T-Py-T/aks-ado-microservices-cicd `880adbd4`
-> - Ship 91 / PR #73: T-Py-T/aks-ado-microservices-cicd `a75013c4`
-> - Ship 219: T-Py-T/aks-ado-microservices-cicd `864c3389` — docs/README index
-> - Ship 227: base main `864c3389` + PR pending Steward — README/roadmap cross-link
-> - Ship 239 / PR #94: base main `eccde3f7` + pending Steward
-> - Ship 243: base main `182e9315` / PR#94 + this PR pending Steward — README/SECURITY/CONTRIBUTING cross-link
-
-Planned evidence-backed work is tracked in [`ROADMAP.md`](ROADMAP.md); wayfinder
-[#90](https://github.com/T-Py-T/aks-ado-microservices-cicd/issues/90) records next
-steps after Ship 219. A tip-cite is a trace pointer, not approval and never `READY`.
-
-The 2A lane remains **BLOCKED-AUTH / Telemetry GAP**. This repository makes no
-`READY` claim and reports no invented score; no readiness conclusion is asserted.
-The Steward resolves each 8-character tip against `main` when a full SHA is needed.
+- [Online Boutique](https://github.com/GoogleCloudPlatform/microservices-demo)
+  by Google Cloud, the application this pipeline delivers
+- [Trivy](https://github.com/aquasecurity/trivy) and
+  [kubeconform](https://github.com/yannh/kubeconform)
