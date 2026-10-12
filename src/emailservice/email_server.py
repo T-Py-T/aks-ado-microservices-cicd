@@ -43,8 +43,9 @@ from logger import getJSONLogger
 logger = getJSONLogger('emailservice-server')
 
 # Loads confirmation email template from file
+_TEMPLATE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 env = Environment(
-    loader=FileSystemLoader('templates'),
+    loader=FileSystemLoader(_TEMPLATE_DIR),
     autoescape=select_autoescape(['html', 'xml'])
 )
 template = env.get_template('confirmation.html')
@@ -55,8 +56,9 @@ class BaseEmailService(demo_pb2_grpc.EmailServiceServicer):
       status=health_pb2.HealthCheckResponse.SERVING)
   
   def Watch(self, request, context):
-    return health_pb2.HealthCheckResponse(
-      status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Watch is not implemented')
+    return health_pb2.HealthCheckResponse()
 
 class EmailService(BaseEmailService):
   def __init__(self):

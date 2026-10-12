@@ -25,8 +25,14 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Validate repository policy
-        run: python -m unittest tests.test_repository_policy
+      - name: Install Python service dependencies for tests
+        run: |
+          python -m pip install --disable-pip-version-check \
+            -r src/emailservice/requirements.txt \
+            -r src/recommendationservice/requirements.txt
+
+      - name: Run Python unit tests
+        run: python -m unittest discover -s tests -p "test_*.py"
 
       - name: Audit Python dependencies
         run: |
@@ -47,6 +53,7 @@ jobs:
             (
               cd "src/$service"
               npm ci
+              npm test
               npm audit --omit=dev
             )
           done
