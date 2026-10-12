@@ -48,13 +48,13 @@ func IsZero(m pb.Money) bool { return m.GetUnits() == 0 && m.GetNanos() == 0 }
 // IsPositive returns true if the specified money value is valid and is
 // positive.
 func IsPositive(m pb.Money) bool {
-	return IsValid(m) && m.GetUnits() > 0 || (m.GetUnits() == 0 && m.GetNanos() > 0)
+	return IsValid(m) && (m.GetUnits() > 0 || (m.GetUnits() == 0 && m.GetNanos() > 0))
 }
 
 // IsNegative returns true if the specified money value is valid and is
 // negative.
 func IsNegative(m pb.Money) bool {
-	return IsValid(m) && m.GetUnits() < 0 || (m.GetUnits() == 0 && m.GetNanos() < 0)
+	return IsValid(m) && (m.GetUnits() < 0 || (m.GetUnits() == 0 && m.GetNanos() < 0))
 }
 
 // AreSameCurrency returns true if values l and r have a currency code and
@@ -123,6 +123,9 @@ func Sum(l, r pb.Money) (pb.Money, error) {
 // MultiplySlow is a slow multiplication operation done through adding the value
 // to itself n-1 times.
 func MultiplySlow(m pb.Money, n uint32) pb.Money {
+	if n == 0 {
+		return pb.Money{CurrencyCode: m.GetCurrencyCode()}
+	}
 	out := m
 	for n > 1 {
 		out = Must(Sum(out, m))

@@ -81,6 +81,7 @@ func TestIsPositive(t *testing.T) {
 		{"invalid (-/+)", mm(-1, +1), false},
 		{"negative (-/-)", mm(-1, -1), false},
 		{"invalid (+/-)", mm(+1, -1), false},
+		{"invalid nanos overflow treated as non-positive", mm(0, 1000000000), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -102,6 +103,7 @@ func TestIsNegative(t *testing.T) {
 		{"invalid (-/+)", mm(-1, +1), false},
 		{"negative (-/-)", mm(-1, -1), true},
 		{"invalid (+/-)", mm(+1, -1), false},
+		{"invalid nanos underflow treated as non-negative", mm(0, -1000000000), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -186,6 +188,14 @@ func TestMust_pass(t *testing.T) {
 	v := Must(mm(2, 3), nil)
 	if !AreEquals(v, mm(2, 3)) {
 		t.Errorf("returned the wrong value: %v", v)
+	}
+}
+
+func TestMultiplySlow_zeroQuantity(t *testing.T) {
+	got := MultiplySlow(mmc(12, 500000000, "USD"), 0)
+	want := mmc(0, 0, "USD")
+	if !AreEquals(got, want) {
+		t.Fatalf("MultiplySlow(..., 0) = %v, want %v", got, want)
 	}
 }
 

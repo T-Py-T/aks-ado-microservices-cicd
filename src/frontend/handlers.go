@@ -437,6 +437,14 @@ func (fe *frontendServer) chooseAd(ctx context.Context, ctxKeys []string, log lo
 		log.WithField("error", err).Warn("failed to retrieve ads")
 		return nil
 	}
+	return pickRandomAd(ads)
+}
+
+// pickRandomAd returns one ad from ads, or nil when the list is empty.
+func pickRandomAd(ads []*pb.Ad) *pb.Ad {
+	if len(ads) == 0 {
+		return nil
+	}
 	return ads[rand.Intn(len(ads))]
 }
 
