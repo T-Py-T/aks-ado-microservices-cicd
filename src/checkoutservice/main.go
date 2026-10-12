@@ -258,7 +258,9 @@ func (cs *checkoutService) PlaceOrder(ctx context.Context, req *pb.PlaceOrderReq
 		return nil, status.Errorf(codes.Unavailable, "shipping error: %+v", err)
 	}
 
-	_ = cs.emptyUserCart(ctx, req.UserId)
+	if err := cs.emptyUserCart(ctx, req.UserId); err != nil {
+		return nil, status.Errorf(codes.Internal, "order placed but failed to clear cart: %v", err)
+	}
 
 	orderResult := &pb.OrderResult{
 		OrderId:            orderID.String(),

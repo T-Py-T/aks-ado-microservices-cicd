@@ -77,8 +77,10 @@ namespace cartservice.cartstore
                 }
                 var totalQuantity = quantity + currentQuantity;
 
-                var insertCmd = $"INSERT INTO {tableName} (userId, productId, quantity) VALUES ('{userId}', '{productId}', {totalQuantity})";
-                await using (var cmdInsert = dataSource.CreateCommand(insertCmd))
+                var upsertCmd =
+                    $"INSERT INTO {tableName} (userId, productId, quantity) VALUES ('{userId}', '{productId}', {totalQuantity}) " +
+                    $"ON CONFLICT (userId, productId) DO UPDATE SET quantity = EXCLUDED.quantity";
+                await using (var cmdInsert = dataSource.CreateCommand(upsertCmd))
                 {
                     await Task.Run(() =>
                     {
