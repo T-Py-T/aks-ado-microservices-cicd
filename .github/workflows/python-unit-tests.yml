@@ -1,0 +1,38 @@
+name: Python unit tests
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: python-unit-tests-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: Run repository and service Python unit tests
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          for service_dir in src/*/; do
+            test_dir="${service_dir}tests"
+            if [ -d "$test_dir" ] && compgen -G "${test_dir}/test_*.py" > /dev/null; then
+              echo "Discovering tests in ${test_dir}"
+              python3 -m unittest discover -s "$test_dir" -p 'test_*.py'
+            fi
+          done
