@@ -56,7 +56,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: "1.27.x"
+          go-version: "1.27.2"
           cache: false
 
       - name: Validate Kubernetes resources
@@ -68,6 +68,12 @@ jobs:
             (cd "src/$service" && go test ./...)
           done
 
+      - name: Audit Go modules
+        run: |
+          for service in checkoutservice frontend productcatalogservice shippingservice; do
+            (cd "src/$service" && go run golang.org/x/vuln/cmd/govulncheck@v1.9.0 ./...)
+          done
+
       - name: Set up .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
@@ -75,6 +81,20 @@ jobs:
 
       - name: Test cart service
         run: dotnet test src/cartservice/tests/cartservice.tests.csproj --configuration Release
+
+      - name: Audit .NET dependencies
+        run: dotnet list src/cartservice/src/cartservice.csproj package --vulnerable --include-transitive
+
+      - name: Install Trivy
+        run: |
+          trivy_version=0.74.0
+          wget -q "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_Linux-64bit.deb" -O "trivy_${trivy_version}_Linux-64bit.deb"
+          wget -q "https://github.com/aquasecurity/trivy/releases/download/v${trivy_version}/trivy_${trivy_version}_checksums.txt"
+          grep " trivy_${trivy_version}_Linux-64bit.deb$" "trivy_${trivy_version}_checksums.txt" | sha256sum --check -
+          sudo dpkg -i "trivy_${trivy_version}_Linux-64bit.deb"
+
+      - name: Audit dependency manifests with Trivy
+        run: trivy fs --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 --scanners vuln src
 
       - name: Set up Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
