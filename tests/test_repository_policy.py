@@ -74,7 +74,7 @@ class RepositoryPolicyTests(unittest.TestCase):
         config = (REPOSITORY_ROOT / ".grype.yaml").read_text()
         self.assertEqual(config.count("  - vulnerability:"), 4)
         self.assertEqual(config.count("      name: python"), 4)
-        self.assertEqual(config.count("      version: 3.14.7"), 4)
+        self.assertEqual(config.count("      version: 3.14.8"), 4)
         self.assertEqual(config.count("      type: binary"), 4)
 
 

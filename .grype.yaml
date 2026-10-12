@@ -3,23 +3,23 @@ ignore:
     reason: The published fix requires Python 3.15.0rc2; keep the service on the current stable Python 3.14 release.
     package:
       name: python
-      version: 3.14.7
+      version: 3.14.8
       type: binary
   - vulnerability: CVE-2026-15806
     reason: The published fix requires Python 3.15.0rc2; keep the service on the current stable Python 3.14 release.
     package:
       name: python
-      version: 3.14.7
+      version: 3.14.8
       type: binary
   - vulnerability: CVE-2025-15367
     reason: The published fix requires a Python 3.15 prerelease; keep the service on the current stable Python 3.14 release.
     package:
       name: python
-      version: 3.14.7
+      version: 3.14.8
       type: binary
   - vulnerability: CVE-2026-15310
     reason: The published fix requires Python 3.15.0rc2; keep the service on the current stable Python 3.14 release.
     package:
       name: python
-      version: 3.14.7
+      version: 3.14.8
       type: binary
