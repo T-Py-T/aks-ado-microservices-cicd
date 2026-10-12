@@ -415,6 +415,10 @@ func (fe *frontendServer) setCurrencyHandler(w http.ResponseWriter, r *http.Requ
 		Debug("setting currency")
 
 	if cur != "" {
+		if !whitelistedCurrencies[cur] {
+			renderHTTPError(log, r, w, errors.Errorf("currency %q is not supported", cur), http.StatusUnprocessableEntity)
+			return
+		}
 		http.SetCookie(w, &http.Cookie{
 			Name:   cookieCurrency,
 			Value:  cur,
