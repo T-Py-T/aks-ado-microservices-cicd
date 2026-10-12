@@ -129,17 +129,26 @@ function convert (call, callback) {
 
       // Convert: from_currency --> EUR
       const from = request.from;
+      const fromRate = data[from.currency_code];
+      const toRate = data[request.to_code];
+      if (fromRate == null || toRate == null) {
+        callback({
+          code: grpc.status.INVALID_ARGUMENT,
+          message: 'unsupported currency code'
+        });
+        return;
+      }
       const euros = _carry({
-        units: from.units / data[from.currency_code],
-        nanos: from.nanos / data[from.currency_code]
+        units: from.units / fromRate,
+        nanos: from.nanos / fromRate
       });
 
       euros.nanos = Math.round(euros.nanos);
 
       // Convert: EUR --> to_currency
       const result = _carry({
-        units: euros.units * data[request.to_code],
-        nanos: euros.nanos * data[request.to_code]
+        units: euros.units * toRate,
+        nanos: euros.nanos * toRate
       });
 
       result.units = Math.floor(result.units);
@@ -182,4 +191,10 @@ function main () {
    );
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  convert
+};
