@@ -24,6 +24,30 @@ def external_parent_image(from_line: str) -> str | None:
     return image
 
 
+class ExternalParentImageTests(unittest.TestCase):
+    def test_parses_simple_from_line(self) -> None:
+        self.assertEqual(
+            external_parent_image("FROM alpine:3.19@sha256:abc"),
+            "alpine:3.19@sha256:abc",
+        )
+
+    def test_parses_platform_scoped_from_line(self) -> None:
+        self.assertEqual(
+            external_parent_image(
+                "FROM --platform=$BUILDPLATFORM python:3.14.7-alpine@sha256:deadbeef"
+            ),
+            "python:3.14.7-alpine@sha256:deadbeef",
+        )
+
+    def test_ignores_multi_stage_aliases(self) -> None:
+        for alias in ("base", "build", "builder", "publish"):
+            self.assertIsNone(external_parent_image(f"FROM {alias} AS runtime"))
+
+    def test_non_from_lines_return_none(self) -> None:
+        self.assertIsNone(external_parent_image("RUN apk add --no-cache curl"))
+        self.assertIsNone(external_parent_image(""))
+
+
 class RepositoryPolicyTests(unittest.TestCase):
     def test_github_workflows_only_run_for_pull_requests(self) -> None:
         workflow_paths = sorted((REPOSITORY_ROOT / ".github" / "workflows").glob("*.y*ml"))
