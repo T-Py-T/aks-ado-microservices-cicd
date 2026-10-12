@@ -15,7 +15,6 @@
 # limitations under the License.
 
 import os
-import random
 import time
 import traceback
 from concurrent import futures
@@ -38,6 +37,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 
 from logger import getJSONLogger
+from recommendations import list_recommendations
 logger = getJSONLogger('recommendationservice-server')
 
 def initStackdriverProfiling():
@@ -68,17 +68,10 @@ def initStackdriverProfiling():
 
 class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
     def ListRecommendations(self, request, context):
-        max_responses = 5
         # fetch list of products from product catalog stub
         cat_response = product_catalog_stub.ListProducts(demo_pb2.Empty())
         product_ids = [x.id for x in cat_response.products]
-        filtered_products = list(set(product_ids)-set(request.product_ids))
-        num_products = len(filtered_products)
-        num_return = min(max_responses, num_products)
-        # sample list of indicies to return
-        indices = random.sample(range(num_products), num_return)
-        # fetch product ids from indices
-        prod_list = [filtered_products[i] for i in indices]
+        prod_list = list_recommendations(request.product_ids, product_ids)
         logger.info("[Recv ListRecommendations] product_ids={}".format(prod_list))
         # build and return response
         response = demo_pb2.ListRecommendationsResponse()
@@ -90,8 +83,9 @@ class RecommendationService(demo_pb2_grpc.RecommendationServiceServicer):
             status=health_pb2.HealthCheckResponse.SERVING)
 
     def Watch(self, request, context):
-        return health_pb2.HealthCheckResponse(
-            status=health_pb2.HealthCheckResponse.UNIMPLEMENTED)
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Watch is not implemented')
+        return health_pb2.HealthCheckResponse()
 
 
 if __name__ == "__main__":

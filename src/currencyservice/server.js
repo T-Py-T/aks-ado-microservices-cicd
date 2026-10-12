@@ -63,6 +63,10 @@ else {
 const path = require('path');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const {
+  getSupportedCurrencyCodes,
+  convertAmount,
+} = require('./currency_logic');
 
 const MAIN_PROTO_PATH = path.join(__dirname, './proto/demo.proto');
 const HEALTH_PROTO_PATH = path.join(__dirname, './proto/grpc/health/v1/health.proto');
@@ -90,33 +94,16 @@ function _loadProto (path) {
 }
 
 /**
- * Helper function that gets currency data from a stored JSON file
- * Uses public data from European Central Bank
- */
-function _getCurrencyData (callback) {
-  const data = require('./data/currency_conversion.json');
-  callback(data);
-}
-
-/**
- * Helper function that handles decimal/fractional carrying
- */
-function _carry (amount) {
-  const fractionSize = Math.pow(10, 9);
-  amount.nanos += (amount.units % 1) * fractionSize;
-  amount.units = Math.floor(amount.units) + Math.floor(amount.nanos / fractionSize);
-  amount.nanos = amount.nanos % fractionSize;
-  return amount;
-}
-
-/**
  * Lists the supported currencies
  */
 function getSupportedCurrencies (call, callback) {
   logger.info('Getting supported currencies...');
-  _getCurrencyData((data) => {
-    callback(null, {currency_codes: Object.keys(data)});
-  });
+  try {
+    callback(null, {currency_codes: getSupportedCurrencyCodes()});
+  } catch (err) {
+    logger.error(`supported currencies request failed: ${err}`);
+    callback(err);
+  }
 }
 
 /**
@@ -124,34 +111,13 @@ function getSupportedCurrencies (call, callback) {
  */
 function convert (call, callback) {
   try {
-    _getCurrencyData((data) => {
-      const request = call.request;
-
-      // Convert: from_currency --> EUR
-      const from = request.from;
-      const euros = _carry({
-        units: from.units / data[from.currency_code],
-        nanos: from.nanos / data[from.currency_code]
-      });
-
-      euros.nanos = Math.round(euros.nanos);
-
-      // Convert: EUR --> to_currency
-      const result = _carry({
-        units: euros.units * data[request.to_code],
-        nanos: euros.nanos * data[request.to_code]
-      });
-
-      result.units = Math.floor(result.units);
-      result.nanos = Math.floor(result.nanos);
-      result.currency_code = request.to_code;
-
-      logger.info(`conversion request successful`);
-      callback(null, result);
-    });
+    const request = call.request;
+    const result = convertAmount(request.from, request.to_code);
+    logger.info(`conversion request successful`);
+    callback(null, result);
   } catch (err) {
     logger.error(`conversion request failed: ${err}`);
-    callback(err.message);
+    callback(err);
   }
 }
 
@@ -182,4 +148,13 @@ function main () {
    );
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  getSupportedCurrencies,
+  convert,
+  check,
+  main,
+};
