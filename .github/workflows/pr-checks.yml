@@ -4,12 +4,15 @@ on:
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
 
 permissions:
   contents: read
 
 concurrency:
-  group: pull-request-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,33 +28,10 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Validate repository policy
-        run: python -m unittest tests.test_repository_policy
-
-      - name: Audit Python dependencies
-        run: |
-          python -m pip install --disable-pip-version-check pip-audit==2.10.1
-          python -m compileall -q src/emailservice src/loadgenerator src/recommendationservice
-          pip-audit -r src/emailservice/requirements.txt
-          pip-audit -r src/loadgenerator/requirements.txt
-          pip-audit -r src/recommendationservice/requirements.txt
-
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
-
-      - name: Test and audit Node.js services
-        run: |
-          for service in currencyservice paymentservice; do
-            (
-              cd "src/$service"
-              npm ci
-              npm audit --omit=dev
-            )
-          done
-          node tests/node_service_smoke.js src/currencyservice server.js "CurrencyService gRPC server started" 17000
-          node tests/node_service_smoke.js src/paymentservice index.js "PaymentService gRPC server started" 15000
 
       - name: Set up Go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -59,22 +39,10 @@ jobs:
           go-version: "1.27.x"
           cache: false
 
-      - name: Validate Kubernetes resources
-        run: go run github.com/yannh/kubeconform/cmd/kubeconform@v0.8.0 -strict -summary deployment-service.yaml
-
-      - name: Test Go services
-        run: |
-          for service in checkoutservice frontend productcatalogservice shippingservice; do
-            (cd "src/$service" && go test ./...)
-          done
-
       - name: Set up .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: "10.0.x"
-
-      - name: Test cart service
-        run: dotnet test src/cartservice/tests/cartservice.tests.csproj --configuration Release
 
       - name: Set up Java
         uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
@@ -82,6 +50,5 @@ jobs:
           distribution: temurin
           java-version: "25"
 
-      - name: Build ad service
-        working-directory: src/adservice
-        run: ./gradlew --no-daemon build
+      - name: Run local CI script
+        run: ./scripts/ci-local.sh
